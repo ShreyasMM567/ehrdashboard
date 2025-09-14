@@ -30,7 +30,7 @@ export function usePatient(id: string) {
 export function usePatientMutations() {
   const { mutate } = useSWR('patients')
   
-  const create = async (patient: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const create = async (patient: Omit<Patient, 'id'>) => {
     const newPatient = await createPatient(patient)
     mutate()
     return newPatient

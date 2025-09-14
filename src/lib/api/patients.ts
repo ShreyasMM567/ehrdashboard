@@ -1,107 +1,113 @@
+import axios from 'axios'
 import { Patient } from '@/types'
 
-// Mock data for development
-const mockPatients: Patient[] = [
-  {
-    id: '1',
-    firstName: 'John',
-    lastName: 'Doe',
-    dateOfBirth: '1985-03-15',
-    email: 'john.doe@email.com',
-    phone: '5551234567',
-    address: {
-      street: '123 Main St',
-      city: 'Anytown',
-      state: 'CA',
-      zipCode: '12345'
-    },
-    emergencyContact: {
-      name: 'Jane Doe',
-      relationship: 'Spouse',
-      phone: '5551234568'
-    },
-    insurance: {
-      provider: 'Blue Cross Blue Shield',
-      policyNumber: 'BC123456789',
-      groupNumber: 'GRP001'
-    },
-    createdAt: '2024-01-15T10:00:00Z',
-    updatedAt: '2024-01-15T10:00:00Z'
-  },
-  {
-    id: '2',
-    firstName: 'Sarah',
-    lastName: 'Smith',
-    dateOfBirth: '1990-07-22',
-    email: 'sarah.smith@email.com',
-    phone: '5559876543',
-    address: {
-      street: '456 Oak Ave',
-      city: 'Springfield',
-      state: 'IL',
-      zipCode: '62701'
-    },
-    emergencyContact: {
-      name: 'Mike Smith',
-      relationship: 'Brother',
-      phone: '5559876544'
-    },
-    insurance: {
-      provider: 'Aetna',
-      policyNumber: 'AET987654321',
-      groupNumber: 'GRP002'
-    },
-    createdAt: '2024-01-16T14:30:00Z',
-    updatedAt: '2024-01-16T14:30:00Z'
-  }
-]
-
 export async function getPatients(): Promise<Patient[]> {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 500))
-  return mockPatients
+  try {
+    const response = await axios.get('/api/patients')
+    console.log('API Response:', response.data)
+    
+    // Handle FHIR Bundle response format
+    if (response.data.entry && Array.isArray(response.data.entry)) {
+      return response.data.entry.map((entry: any) => {
+        const resource = entry.resource
+        console.log('Existing patient phone format:', resource.telecom?.find((t: any) => t.system === 'phone')?.value)
+        return {
+          id: resource.id,
+          family: resource.name?.[0]?.family || '',
+          given: resource.name?.[0]?.given?.[0] || '',
+          birthDate: resource.birthDate || '',
+          email: resource.telecom?.find((t: any) => t.system === 'email')?.value || '',
+          phone: resource.telecom?.find((t: any) => t.system === 'phone')?.value || ''
+        }
+      })
+    }
+    
+    return []
+  } catch (error) {
+    console.error('Error fetching patients:', error)
+    return []
+  }
 }
 
 export async function getPatient(id: string): Promise<Patient | null> {
-  await new Promise(resolve => setTimeout(resolve, 300))
-  return mockPatients.find(patient => patient.id === id) || null
+  try {
+    const response = await axios.get(`/api/patients/${id}`)
+    const resource = response.data
+    
+    return {
+      id: resource.id,
+      family: resource.name?.[0]?.family || '',
+      given: resource.name?.[0]?.given?.[0] || '',
+      birthDate: resource.birthDate || '',
+      email: resource.telecom?.find((t: any) => t.system === 'email')?.value || '',
+      phone: resource.telecom?.find((t: any) => t.system === 'phone')?.value || ''
+    }
+  } catch (error) {
+    console.error('Error fetching patient:', error)
+    return null
+  }
 }
 
-export async function createPatient(patient: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>): Promise<Patient> {
-  await new Promise(resolve => setTimeout(resolve, 800))
-  
-  const newPatient: Patient = {
-    ...patient,
-    id: Date.now().toString(),
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+export async function createPatient(patient: Omit<Patient, 'id'>): Promise<Patient> {
+  try {
+    // Convert to FHIR format - match the exact working format
+    const fhirPatient = {
+      resourceType: "Patient",
+      name: [
+        {
+          family: patient.family,
+          given: [patient.given]
+        }
+      ],
+      telecom: [
+        {
+          system: "phone",
+          value: patient.phone, // Use original format with dashes
+          use: "mobile"
+        },
+        {
+          system: "email",
+          value: patient.email
+        }
+      ],
+      birthDate: patient.birthDate
+    }
+    
+    console.log('Sending FHIR patient:', JSON.stringify(fhirPatient, null, 2))
+    
+    const response = await axios.post('/api/patients', fhirPatient)
+    const resource = response.data
+    
+    return {
+      id: resource.id,
+      family: resource.name?.[0]?.family || '',
+      given: resource.name?.[0]?.given?.[0] || '',
+      birthDate: resource.birthDate || '',
+      email: resource.telecom?.find((t: any) => t.system === 'email')?.value || '',
+      phone: resource.telecom?.find((t: any) => t.system === 'phone')?.value || ''
+    }
+  } catch (error) {
+    console.error('Error creating patient:', error)
+    throw error
   }
-  
-  mockPatients.push(newPatient)
-  return newPatient
 }
 
 export async function updatePatient(id: string, updates: Partial<Patient>): Promise<Patient | null> {
-  await new Promise(resolve => setTimeout(resolve, 600))
-  
-  const index = mockPatients.findIndex(patient => patient.id === id)
-  if (index === -1) return null
-  
-  mockPatients[index] = {
-    ...mockPatients[index],
-    ...updates,
-    updatedAt: new Date().toISOString()
+  try {
+    const response = await axios.put(`/api/patients/${id}`, updates)
+    return response.data
+  } catch (error) {
+    console.error('Error updating patient:', error)
+    return null
   }
-  
-  return mockPatients[index]
 }
 
 export async function deletePatient(id: string): Promise<boolean> {
-  await new Promise(resolve => setTimeout(resolve, 400))
-  
-  const index = mockPatients.findIndex(patient => patient.id === id)
-  if (index === -1) return false
-  
-  mockPatients.splice(index, 1)
-  return true
+  try {
+    await axios.delete(`/api/patients/${id}`)
+    return true
+  } catch (error) {
+    console.error('Error deleting patient:', error)
+    return false
+  }
 }

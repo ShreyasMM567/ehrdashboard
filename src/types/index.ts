@@ -1,28 +1,10 @@
 export interface Patient {
   id: string
-  firstName: string
-  lastName: string
-  dateOfBirth: string
+  family: string
+  given: string
+  birthDate: string
   email: string
   phone: string
-  address: {
-    street: string
-    city: string
-    state: string
-    zipCode: string
-  }
-  emergencyContact: {
-    name: string
-    relationship: string
-    phone: string
-  }
-  insurance: {
-    provider: string
-    policyNumber: string
-    groupNumber: string
-  }
-  createdAt: string
-  updatedAt: string
 }
 
 export interface Appointment {

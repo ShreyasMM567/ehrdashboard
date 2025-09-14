@@ -32,12 +32,12 @@ export default function PatientsPage() {
   }
 
   const handleDeletePatient = async (patient: Patient) => {
-    if (window.confirm(`Are you sure you want to delete ${patient.firstName} ${patient.lastName}?`)) {
+    if (window.confirm(`Are you sure you want to delete ${patient.given} ${patient.family}?`)) {
       await remove(patient.id)
     }
   }
 
-  const handleSubmit = async (data: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const handleSubmit = async (data: Omit<Patient, 'id'>) => {
     if (isEditing && selectedPatient) {
       await update(selectedPatient.id, data)
     } else {
@@ -99,9 +99,9 @@ export default function PatientsPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
-                    <TableHead>Date of Birth</TableHead>
-                    <TableHead>Contact</TableHead>
-                    <TableHead>Insurance</TableHead>
+                    <TableHead>Birth Date</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Phone</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -109,25 +109,11 @@ export default function PatientsPage() {
                   {patients.map((patient) => (
                     <TableRow key={patient.id}>
                       <TableCell className="font-medium">
-                        {patient.firstName} {patient.lastName}
+                        {patient.given} {patient.family}
                       </TableCell>
-                      <TableCell>{formatDate(patient.dateOfBirth)}</TableCell>
-                      <TableCell>
-                        <div>
-                          <div>{patient.email}</div>
-                          <div className="text-sm text-gray-500">
-                            {formatPhoneNumber(patient.phone)}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">{patient.insurance.provider}</div>
-                          <div className="text-sm text-gray-500">
-                            {patient.insurance.policyNumber}
-                          </div>
-                        </div>
-                      </TableCell>
+                      <TableCell>{formatDate(patient.birthDate)}</TableCell>
+                      <TableCell>{patient.email}</TableCell>
+                      <TableCell>{formatPhoneNumber(patient.phone)}</TableCell>
                       <TableCell>
                         <div className="flex items-center space-x-2">
                           <Button
