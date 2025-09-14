@@ -44,7 +44,15 @@ export async function POST(request: NextRequest) {
       }
     )
     
-    return NextResponse.json(response.data)
+    // Extract patient ID from location header
+    const locationHeader = response.headers.location
+    const patientId = locationHeader ? locationHeader.split('/').pop() : response.data.id
+    
+    return NextResponse.json({
+      ...response.data,
+      id: patientId,
+      location: locationHeader
+    })
   } catch (error: any) {
     console.error('Error creating patient:', error)
     console.error('Error response:', error.response?.data)

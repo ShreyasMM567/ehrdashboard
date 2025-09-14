@@ -55,13 +55,13 @@ export default function AppointmentsPage() {
       case 'confirmed':
         return 'bg-green-100 text-green-800'
       case 'completed':
-        return 'bg-gray-100 text-gray-800'
+        return 'bg-gray-100 text-black'
       case 'cancelled':
         return 'bg-red-100 text-red-800'
       case 'no-show':
         return 'bg-orange-100 text-orange-800'
       default:
-        return 'bg-gray-100 text-gray-800'
+        return 'bg-gray-100 text-black'
     }
   }
 
@@ -84,8 +84,8 @@ export default function AppointmentsPage() {
         {/* Page Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Appointments</h1>
-            <p className="text-gray-600 mt-2">Manage patient appointments and scheduling</p>
+            <h1 className="text-3xl font-bold text-black">Appointments</h1>
+            <p className="text-black mt-2">Manage patient appointments and scheduling</p>
           </div>
           <Button onClick={handleBookAppointment}>
             <Plus className="h-4 w-4 mr-2" />
@@ -104,11 +104,11 @@ export default function AppointmentsPage() {
           <CardContent>
             {isLoading ? (
               <div className="flex items-center justify-center h-32">
-                <div className="text-gray-500">Loading appointments...</div>
+                <div className="text-black">Loading appointments...</div>
               </div>
             ) : appointments.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-gray-500 mb-4">No appointments scheduled</p>
+                <p className="text-black mb-4">No appointments scheduled</p>
                 <Button onClick={handleBookAppointment}>
                   <Plus className="h-4 w-4 mr-2" />
                   Book First Appointment
@@ -136,7 +136,7 @@ export default function AppointmentsPage() {
                       <TableCell>
                         <div>
                           <div>{formatDate(appointment.date)}</div>
-                          <div className="text-sm text-gray-500">
+                          <div className="text-sm text-black">
                             {appointment.time} ({appointment.duration} min)
                           </div>
                         </div>

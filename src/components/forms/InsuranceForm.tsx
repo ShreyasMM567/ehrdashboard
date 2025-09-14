@@ -75,7 +75,7 @@ export function InsuranceForm({ insurance, onSubmit, onCancel }: InsuranceFormPr
 
       {/* Insurance Provider */}
       <div className="space-y-4">
-        <h3 className="text-lg font-medium text-gray-900">Insurance Provider</h3>
+        <h3 className="text-lg font-medium text-black">Insurance Provider</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input
             label="Insurance Provider"
@@ -98,7 +98,7 @@ export function InsuranceForm({ insurance, onSubmit, onCancel }: InsuranceFormPr
 
       {/* Subscriber Information */}
       <div className="space-y-4">
-        <h3 className="text-lg font-medium text-gray-900">Subscriber Information</h3>
+        <h3 className="text-lg font-medium text-black">Subscriber Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input
             label="Subscriber Name"
@@ -116,7 +116,7 @@ export function InsuranceForm({ insurance, onSubmit, onCancel }: InsuranceFormPr
 
       {/* Coverage Dates */}
       <div className="space-y-4">
-        <h3 className="text-lg font-medium text-gray-900">Coverage Dates</h3>
+        <h3 className="text-lg font-medium text-black">Coverage Dates</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input
             label="Effective Date"
@@ -135,7 +135,7 @@ export function InsuranceForm({ insurance, onSubmit, onCancel }: InsuranceFormPr
 
       {/* Financial Information */}
       <div className="space-y-4">
-        <h3 className="text-lg font-medium text-gray-900">Financial Information</h3>
+        <h3 className="text-lg font-medium text-black">Financial Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input
             label="Copay Amount ($)"
@@ -156,14 +156,14 @@ export function InsuranceForm({ insurance, onSubmit, onCancel }: InsuranceFormPr
 
       {/* Status */}
       <div className="space-y-4">
-        <h3 className="text-lg font-medium text-gray-900">Status</h3>
+        <h3 className="text-lg font-medium text-black">Status</h3>
         <div className="flex items-center space-x-2">
           <input
             type="checkbox"
             {...register('isActive')}
             className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
           />
-          <label className="text-sm font-medium text-gray-700">
+          <label className="text-sm font-medium text-black">
             Active Insurance Coverage
           </label>
         </div>

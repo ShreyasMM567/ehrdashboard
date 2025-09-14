@@ -62,7 +62,7 @@ export function BillingForm({ billingRecord, onSubmit, onCancel }: BillingFormPr
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
       {/* Patient Information */}
       <div className="space-y-4">
-        <h3 className="text-lg font-medium text-gray-900">Patient Information</h3>
+        <h3 className="text-lg font-medium text-black">Patient Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input
             label="Patient ID"
@@ -79,7 +79,7 @@ export function BillingForm({ billingRecord, onSubmit, onCancel }: BillingFormPr
 
       {/* Service Information */}
       <div className="space-y-4">
-        <h3 className="text-lg font-medium text-gray-900">Service Information</h3>
+        <h3 className="text-lg font-medium text-black">Service Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input
             label="Service Date"
@@ -88,7 +88,7 @@ export function BillingForm({ billingRecord, onSubmit, onCancel }: BillingFormPr
             error={errors.serviceDate?.message}
           />
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-black mb-1">
               Status
             </label>
             <select
@@ -106,13 +106,13 @@ export function BillingForm({ billingRecord, onSubmit, onCancel }: BillingFormPr
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-black mb-1">
             Service Description
           </label>
           <textarea
             {...register('service')}
             rows={3}
-            className="flex w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="flex w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-black placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="Describe the service provided..."
           />
           {errors.service && (
@@ -123,7 +123,7 @@ export function BillingForm({ billingRecord, onSubmit, onCancel }: BillingFormPr
 
       {/* Financial Information */}
       <div className="space-y-4">
-        <h3 className="text-lg font-medium text-gray-900">Financial Information</h3>
+        <h3 className="text-lg font-medium text-black">Financial Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Input
             label="Total Amount ($)"

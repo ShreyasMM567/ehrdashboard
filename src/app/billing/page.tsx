@@ -77,7 +77,7 @@ export default function BillingPage() {
       case 'disputed':
         return 'bg-orange-100 text-orange-800'
       default:
-        return 'bg-gray-100 text-gray-800'
+        return 'bg-gray-100 text-black'
     }
   }
 
@@ -126,8 +126,8 @@ export default function BillingPage() {
         {/* Page Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Billing & Insurance</h1>
-            <p className="text-gray-600 mt-2">Manage billing records, insurance, and financial reports</p>
+            <h1 className="text-3xl font-bold text-black">Billing & Insurance</h1>
+            <p className="text-black mt-2">Manage billing records, insurance, and financial reports</p>
           </div>
           {activeTab !== 'reports' && (
             <Button onClick={handleAddRecord}>
@@ -143,8 +143,8 @@ export default function BillingPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-                  <p className="text-2xl font-bold text-gray-900">$45,230</p>
+                  <p className="text-sm font-medium text-black">Total Revenue</p>
+                  <p className="text-2xl font-bold text-black">$45,230</p>
                 </div>
                 <DollarSign className="h-8 w-8 text-green-600" />
               </div>
@@ -154,8 +154,8 @@ export default function BillingPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Pending Payments</p>
-                  <p className="text-2xl font-bold text-gray-900">$12,450</p>
+                  <p className="text-sm font-medium text-black">Pending Payments</p>
+                  <p className="text-2xl font-bold text-black">$12,450</p>
                 </div>
                 <CreditCard className="h-8 w-8 text-yellow-600" />
               </div>
@@ -165,8 +165,8 @@ export default function BillingPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Insurance Claims</p>
-                  <p className="text-2xl font-bold text-gray-900">89</p>
+                  <p className="text-sm font-medium text-black">Insurance Claims</p>
+                  <p className="text-2xl font-bold text-black">89</p>
                 </div>
                 <Shield className="h-8 w-8 text-blue-600" />
               </div>
@@ -176,8 +176,8 @@ export default function BillingPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Overdue Accounts</p>
-                  <p className="text-2xl font-bold text-gray-900">$3,200</p>
+                  <p className="text-sm font-medium text-black">Overdue Accounts</p>
+                  <p className="text-2xl font-bold text-black">$3,200</p>
                 </div>
                 <FileText className="h-8 w-8 text-red-600" />
               </div>
@@ -197,7 +197,7 @@ export default function BillingPage() {
                   className={`flex items-center py-2 px-1 border-b-2 font-medium text-sm ${
                     activeTab === tab.id
                       ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      : 'border-transparent text-black hover:text-gray-700 hover:border-gray-300'
                   }`}
                 >
                   <Icon className="h-5 w-5 mr-2" />
@@ -263,7 +263,7 @@ export default function BillingPage() {
             <CardContent>
               {getCurrentData().length === 0 ? (
                 <div className="text-center py-12">
-                  <p className="text-gray-500 mb-4">No {activeTab} records found</p>
+                  <p className="text-black mb-4">No {activeTab} records found</p>
                   <Button onClick={handleAddRecord}>
                     <DollarSign className="h-4 w-4 mr-2" />
                     Add First {activeTab === 'billing' ? 'Billing Record' : 'Insurance'}
@@ -324,7 +324,7 @@ export default function BillingPage() {
                             <TableCell>${record.deductible}</TableCell>
                             <TableCell>
                               <span className={`px-2 py-1 text-xs rounded-full ${
-                                record.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                                record.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-black'
                               }`}>
                                 {record.isActive ? 'Active' : 'Inactive'}
                               </span>

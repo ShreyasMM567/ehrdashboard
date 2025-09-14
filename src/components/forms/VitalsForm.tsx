@@ -76,7 +76,7 @@ export function VitalsForm({ vitals, onSubmit, onCancel }: VitalsFormProps) {
 
       {/* Blood Pressure */}
       <div className="space-y-4">
-        <h3 className="text-lg font-medium text-gray-900">Blood Pressure</h3>
+        <h3 className="text-lg font-medium text-black">Blood Pressure</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input
             label="Systolic (mmHg)"
@@ -95,7 +95,7 @@ export function VitalsForm({ vitals, onSubmit, onCancel }: VitalsFormProps) {
 
       {/* Vital Signs */}
       <div className="space-y-4">
-        <h3 className="text-lg font-medium text-gray-900">Vital Signs</h3>
+        <h3 className="text-lg font-medium text-black">Vital Signs</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input
             label="Heart Rate (bpm)"
@@ -133,15 +133,15 @@ export function VitalsForm({ vitals, onSubmit, onCancel }: VitalsFormProps) {
 
       {/* Notes */}
       <div className="space-y-4">
-        <h3 className="text-lg font-medium text-gray-900">Notes</h3>
+        <h3 className="text-lg font-medium text-black">Notes</h3>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-black mb-1">
             Additional Notes
           </label>
           <textarea
             {...register('notes')}
             rows={4}
-            className="flex w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="flex w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-black placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="Enter any additional notes about the vitals..."
           />
           {errors.notes && (

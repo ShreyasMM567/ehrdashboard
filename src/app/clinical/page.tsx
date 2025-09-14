@@ -120,8 +120,8 @@ export default function ClinicalPage() {
         {/* Page Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Clinical Records</h1>
-            <p className="text-gray-600 mt-2">Manage patient clinical data and medical records</p>
+            <h1 className="text-3xl font-bold text-black">Clinical Records</h1>
+            <p className="text-black mt-2">Manage patient clinical data and medical records</p>
           </div>
           <Button onClick={handleAddRecord}>
             <Plus className="h-4 w-4 mr-2" />
@@ -141,7 +141,7 @@ export default function ClinicalPage() {
                   className={`flex items-center py-2 px-1 border-b-2 font-medium text-sm ${
                     activeTab === tab.id
                       ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      : 'border-transparent text-black hover:text-gray-700 hover:border-gray-300'
                   }`}
                 >
                   <Icon className="h-5 w-5 mr-2" />
@@ -160,7 +160,7 @@ export default function ClinicalPage() {
           <CardContent>
             {getCurrentData().length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-gray-500 mb-4">No {activeTab} records found</p>
+                <p className="text-black mb-4">No {activeTab} records found</p>
                 <Button onClick={handleAddRecord}>
                   <Plus className="h-4 w-4 mr-2" />
                   Add First {activeTab === 'vitals' ? 'Vitals' : activeTab === 'allergies' ? 'Allergy' : 'Medication'}
@@ -236,7 +236,7 @@ export default function ClinicalPage() {
                           <TableCell>{record.frequency}</TableCell>
                           <TableCell>
                             <span className={`px-2 py-1 text-xs rounded-full ${
-                              record.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                              record.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-black'
                             }`}>
                               {record.isActive ? 'Active' : 'Inactive'}
                             </span>

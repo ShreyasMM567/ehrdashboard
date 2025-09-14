@@ -9,11 +9,12 @@ const API_KEY = process.env.API_KEY
 // GET /api/patients/[id]
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const response = await axios.get(
-      `${API_BASE_URL}/${API_URL_PREFIX}/ema/fhir/v2/Patient/${params.id}`,
+      `${API_BASE_URL}/${API_URL_PREFIX}/ema/fhir/v2/Patient/${id}`,
       {
         headers: {
           'Authorization': `Bearer ${API_ACCESS_TOKEN}`,
@@ -33,13 +34,16 @@ export async function GET(
 // PUT /api/patients/[id]
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const body = await request.json()
+    console.log('PUT request body:', JSON.stringify(body, null, 2))
+    console.log('Updating patient ID:', id)
     
     const response = await axios.put(
-      `${API_BASE_URL}/${API_URL_PREFIX}/ema/fhir/v2/Patient/${params.id}`,
+      `${API_BASE_URL}/${API_URL_PREFIX}/ema/fhir/v2/Patient/${id}`,
       body,
       {
         headers: {
@@ -50,21 +54,28 @@ export async function PUT(
       }
     )
     
+    console.log('PUT response:', response.data)
     return NextResponse.json(response.data)
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating patient:', error)
-    return NextResponse.json({ error: 'Failed to update patient' }, { status: 500 })
+    console.error('Error response:', error.response?.data)
+    console.error('Error status:', error.response?.status)
+    return NextResponse.json({ 
+      error: 'Failed to update patient',
+      details: error.response?.data
+    }, { status: error.response?.status || 500 })
   }
 }
 
 // DELETE /api/patients/[id]
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     await axios.delete(
-      `${API_BASE_URL}/${API_URL_PREFIX}/ema/fhir/v2/Patient/${params.id}`,
+      `${API_BASE_URL}/${API_URL_PREFIX}/ema/fhir/v2/Patient/${id}`,
       {
         headers: {
           'Authorization': `Bearer ${API_ACCESS_TOKEN}`,

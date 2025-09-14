@@ -39,8 +39,8 @@ export default function Home() {
       <div className="space-y-6">
         {/* Page Header */}
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600 mt-2">Welcome to your EHR Integration Dashboard</p>
+          <h1 className="text-3xl font-bold text-black">Dashboard</h1>
+          <p className="text-black mt-2">Welcome to your EHR Integration Dashboard</p>
         </div>
 
         {/* Stats Grid */}
@@ -52,9 +52,9 @@ export default function Home() {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">{stat.title}</p>
-                      <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-                      <p className="text-sm text-gray-500">{stat.change} from last month</p>
+                      <p className="text-sm font-medium text-black">{stat.title}</p>
+                      <p className="text-2xl font-bold text-black">{stat.value}</p>
+                      <p className="text-sm text-black">{stat.change} from last month</p>
                     </div>
                     <Icon className={`h-8 w-8 ${stat.color}`} />
                   </div>
@@ -75,7 +75,7 @@ export default function Home() {
                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <div>
                     <p className="font-medium">John Doe</p>
-                    <p className="text-sm text-gray-600">10:00 AM - Consultation</p>
+                    <p className="text-sm text-black">10:00 AM - Consultation</p>
                   </div>
                   <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
                     Confirmed
@@ -84,7 +84,7 @@ export default function Home() {
                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <div>
                     <p className="font-medium">Sarah Smith</p>
-                    <p className="text-sm text-gray-600">2:30 PM - Checkup</p>
+                    <p className="text-sm text-black">2:30 PM - Checkup</p>
                   </div>
                   <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
                     Scheduled
@@ -103,22 +103,22 @@ export default function Home() {
                 <button className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left">
                   <Users className="h-6 w-6 text-blue-600 mb-2" />
                   <p className="font-medium">Add Patient</p>
-                  <p className="text-sm text-gray-600">Register new patient</p>
+                  <p className="text-sm text-black">Register new patient</p>
                 </button>
                 <button className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left">
                   <Calendar className="h-6 w-6 text-green-600 mb-2" />
                   <p className="font-medium">Book Appointment</p>
-                  <p className="text-sm text-gray-600">Schedule new visit</p>
+                  <p className="text-sm text-black">Schedule new visit</p>
                 </button>
                 <button className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left">
                   <Stethoscope className="h-6 w-6 text-purple-600 mb-2" />
                   <p className="font-medium">Add Clinical Note</p>
-                  <p className="text-sm text-gray-600">Record patient data</p>
+                  <p className="text-sm text-black">Record patient data</p>
                 </button>
                 <button className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left">
                   <CreditCard className="h-6 w-6 text-orange-600 mb-2" />
                   <p className="font-medium">Process Payment</p>
-                  <p className="text-sm text-gray-600">Handle billing</p>
+                  <p className="text-sm text-black">Handle billing</p>
                 </button>
               </div>
             </CardContent>

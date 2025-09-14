@@ -57,7 +57,7 @@ export function AllergyForm({ allergy, onSubmit, onCancel }: AllergyFormProps) {
 
       {/* Allergy Information */}
       <div className="space-y-4">
-        <h3 className="text-lg font-medium text-gray-900">Allergy Information</h3>
+        <h3 className="text-lg font-medium text-black">Allergy Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input
             label="Allergen"
@@ -66,7 +66,7 @@ export function AllergyForm({ allergy, onSubmit, onCancel }: AllergyFormProps) {
             placeholder="e.g., Penicillin, Peanuts, Latex"
           />
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-black mb-1">
               Severity
             </label>
             <select
@@ -86,17 +86,16 @@ export function AllergyForm({ allergy, onSubmit, onCancel }: AllergyFormProps) {
 
       {/* Reaction */}
       <div className="space-y-4">
-        <h3 className="text-lg font-medium text-gray-900">Reaction Details</h3>
+        <h3 className="text-lg font-medium text-black">Reaction Details</h3>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-black mb-1">
             Reaction Description
           </label>
           <textarea
             {...register('reaction')}
             rows={3}
-            className="flex w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="flex w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-black placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="Describe the allergic reaction..."
-            error={errors.reaction?.message}
           />
           {errors.reaction && (
             <p className="text-sm text-red-600 mt-1">{errors.reaction.message}</p>
@@ -106,15 +105,15 @@ export function AllergyForm({ allergy, onSubmit, onCancel }: AllergyFormProps) {
 
       {/* Notes */}
       <div className="space-y-4">
-        <h3 className="text-lg font-medium text-gray-900">Additional Notes</h3>
+        <h3 className="text-lg font-medium text-black">Additional Notes</h3>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-black mb-1">
             Notes
           </label>
           <textarea
             {...register('notes')}
             rows={3}
-            className="flex w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="flex w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-black placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="Any additional notes about the allergy..."
           />
           {errors.notes && (

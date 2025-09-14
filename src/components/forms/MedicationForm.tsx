@@ -68,7 +68,7 @@ export function MedicationForm({ medication, onSubmit, onCancel }: MedicationFor
 
       {/* Medication Information */}
       <div className="space-y-4">
-        <h3 className="text-lg font-medium text-gray-900">Medication Information</h3>
+        <h3 className="text-lg font-medium text-black">Medication Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input
             label="Medication Name"
@@ -99,7 +99,7 @@ export function MedicationForm({ medication, onSubmit, onCancel }: MedicationFor
 
       {/* Dates */}
       <div className="space-y-4">
-        <h3 className="text-lg font-medium text-gray-900">Prescription Dates</h3>
+        <h3 className="text-lg font-medium text-black">Prescription Dates</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input
             label="Start Date"
@@ -118,14 +118,14 @@ export function MedicationForm({ medication, onSubmit, onCancel }: MedicationFor
 
       {/* Status */}
       <div className="space-y-4">
-        <h3 className="text-lg font-medium text-gray-900">Status</h3>
+        <h3 className="text-lg font-medium text-black">Status</h3>
         <div className="flex items-center space-x-2">
           <input
             type="checkbox"
             {...register('isActive')}
             className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
           />
-          <label className="text-sm font-medium text-gray-700">
+          <label className="text-sm font-medium text-black">
             Active Medication
           </label>
         </div>
@@ -133,15 +133,15 @@ export function MedicationForm({ medication, onSubmit, onCancel }: MedicationFor
 
       {/* Notes */}
       <div className="space-y-4">
-        <h3 className="text-lg font-medium text-gray-900">Additional Notes</h3>
+        <h3 className="text-lg font-medium text-black">Additional Notes</h3>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-black mb-1">
             Notes
           </label>
           <textarea
             {...register('notes')}
             rows={3}
-            className="flex w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="flex w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-black placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="Any additional notes about the medication..."
           />
           {errors.notes && (
