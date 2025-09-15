@@ -31,3 +31,53 @@ export function formatPhoneNumber(phone: string): string {
   }
   return phone
 }
+
+// Cookie utility functions
+export function getCookie(name: string): string | null {
+  if (typeof document === 'undefined') return null
+  
+  const value = `; ${document.cookie}`
+  const parts = value.split(`; ${name}=`)
+  if (parts.length === 2) {
+    return parts.pop()?.split(';').shift() || null
+  }
+  return null
+}
+
+// Utility function to get API credentials from cookies first, then fallback to environment variables
+export function getApiCredentials() {
+  const apiKey = getCookie('api_key') || process.env.API_KEY
+  const accessToken = getCookie('access_token') || process.env.API_ACCESS_TOKEN
+  
+  return {
+    apiKey,
+    accessToken
+  }
+}
+
+// Server-side utility function to get API credentials from request cookies first, then fallback to environment variables
+export function getApiCredentialsFromRequest(request: Request) {
+  const cookieHeader = request.headers.get('cookie')
+  let apiKey = process.env.API_KEY
+  let accessToken = process.env.API_ACCESS_TOKEN
+  
+  if (cookieHeader) {
+    const cookies = cookieHeader.split(';').reduce((acc, cookie) => {
+      const [name, value] = cookie.trim().split('=')
+      acc[name] = value
+      return acc
+    }, {} as Record<string, string>)
+    
+    if (cookies.api_key) {
+      apiKey = cookies.api_key
+    }
+    if (cookies.access_token) {
+      accessToken = cookies.access_token
+    }
+  }
+  
+  return {
+    apiKey,
+    accessToken
+  }
+}

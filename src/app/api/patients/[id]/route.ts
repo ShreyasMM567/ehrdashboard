@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import axios from 'axios'
 import { createAuthenticatedHandler } from '@/lib/auth-middleware'
+import { getApiCredentialsFromRequest } from '@/lib/utils'
 
 const API_BASE_URL = process.env.API_BASE_URL
 const API_URL_PREFIX = process.env.API_URL_PREFIX
-const API_ACCESS_TOKEN = process.env.API_ACCESS_TOKEN
-const API_KEY = process.env.API_KEY
 
 // GET /api/patients/[id]
 export async function GET(
@@ -14,14 +13,15 @@ export async function GET(
 ) {
   return createAuthenticatedHandler(async (req: NextRequest, token) => {
   try {
+    const { apiKey, accessToken } = getApiCredentialsFromRequest(request)
     const { id } = await params
     const response = await axios.get(
       `${API_BASE_URL}/${API_URL_PREFIX}/ema/fhir/v2/Patient/${id}`,
       {
         headers: {
-          'Authorization': `Bearer ${API_ACCESS_TOKEN}`,
+          'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
-          'x-api-key': API_KEY
+          'x-api-key': apiKey
         }
       }
     )
@@ -41,6 +41,7 @@ export async function PUT(
 ) {
   return createAuthenticatedHandler(async (req: NextRequest, token) => {
   try {
+    const { apiKey, accessToken } = getApiCredentialsFromRequest(request)
     const { id } = await params
     const body = await request.json()
     console.log('PUT request body:', JSON.stringify(body, null, 2))
@@ -51,9 +52,9 @@ export async function PUT(
       body,
       {
         headers: {
-          'Authorization': `Bearer ${API_ACCESS_TOKEN}`,
+          'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
-          'x-api-key': API_KEY
+          'x-api-key': apiKey
         }
       }
     )
@@ -79,14 +80,15 @@ export async function DELETE(
 ) {
   return createAuthenticatedHandler(async (req: NextRequest, token) => {
   try {
+    const { apiKey, accessToken } = getApiCredentialsFromRequest(request)
     const { id } = await params
     await axios.delete(
       `${API_BASE_URL}/${API_URL_PREFIX}/ema/fhir/v2/Patient/${id}`,
       {
         headers: {
-          'Authorization': `Bearer ${API_ACCESS_TOKEN}`,
+          'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
-          'x-api-key': API_KEY
+          'x-api-key': apiKey
         }
       }
     )

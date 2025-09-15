@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import axios from 'axios'
 import { createAuthenticatedHandler } from '@/lib/auth-middleware'
+import { getApiCredentialsFromRequest } from '@/lib/utils'
 
 export const GET = createAuthenticatedHandler(async (request: NextRequest, token) => {
   try {
@@ -11,10 +12,9 @@ export const GET = createAuthenticatedHandler(async (request: NextRequest, token
       return NextResponse.json({ error: 'Patient ID is required' }, { status: 400 })
     }
     
+    const { apiKey, accessToken } = getApiCredentialsFromRequest(request)
     const apiBaseUrl = process.env.API_BASE_URL
     const apiUrlPrefix = process.env.API_URL_PREFIX
-    const apiKey = process.env.API_KEY
-    const accessToken = process.env.API_ACCESS_TOKEN
     
     if (!apiBaseUrl || !apiUrlPrefix || !apiKey || !accessToken) {
       return NextResponse.json({ error: 'API configuration missing' }, { status: 500 })
@@ -50,10 +50,9 @@ export const POST = createAuthenticatedHandler(async (request: NextRequest, toke
       return NextResponse.json({ error: 'Patient ID, code, and description are required' }, { status: 400 })
     }
     
+    const { apiKey, accessToken } = getApiCredentialsFromRequest(request)
     const apiBaseUrl = process.env.API_BASE_URL
     const apiUrlPrefix = process.env.API_URL_PREFIX
-    const apiKey = process.env.API_KEY
-    const accessToken = process.env.API_ACCESS_TOKEN
     
     if (!apiBaseUrl || !apiUrlPrefix || !apiKey || !accessToken) {
       return NextResponse.json({ error: 'API configuration missing' }, { status: 500 })

@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import axios from 'axios'
 import { createAuthenticatedHandler } from '@/lib/auth-middleware'
+import { getApiCredentialsFromRequest } from '@/lib/utils'
 
 const API_BASE_URL = process.env.API_BASE_URL
 const API_URL_PREFIX = process.env.API_URL_PREFIX
-const API_ACCESS_TOKEN = process.env.API_ACCESS_TOKEN
-const API_KEY = process.env.API_KEY
 // GET /api/patients
 export const GET = createAuthenticatedHandler(async (request: NextRequest, token) => {
   try {
+    const { apiKey, accessToken } = getApiCredentialsFromRequest(request)
+    
     const { searchParams } = new URL(request.url)
     const count = searchParams.get('_count') || '10'
     const page = searchParams.get('page') || '1'
@@ -23,9 +24,9 @@ export const GET = createAuthenticatedHandler(async (request: NextRequest, token
       `${API_BASE_URL}/${API_URL_PREFIX}/ema/fhir/v2/Patient?${queryParams.toString()}`,
       {
         headers: {
-          'Authorization': `Bearer ${API_ACCESS_TOKEN}`,
+          'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
-          'x-api-key': API_KEY
+          'x-api-key': apiKey
         }
       }
     )
@@ -40,6 +41,7 @@ export const GET = createAuthenticatedHandler(async (request: NextRequest, token
 // POST /api/patients
 export const POST = createAuthenticatedHandler(async (request: NextRequest, token) => {
   try {
+    const { apiKey, accessToken } = getApiCredentialsFromRequest(request)
     const body = await request.json()
     console.log('Request body:', JSON.stringify(body, null, 2))
     
@@ -48,9 +50,9 @@ export const POST = createAuthenticatedHandler(async (request: NextRequest, toke
       body,
       {
         headers: {
-          'Authorization': `Bearer ${API_ACCESS_TOKEN}`,
+          'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
-          'x-api-key': API_KEY
+          'x-api-key': apiKey
         }
       }
     )

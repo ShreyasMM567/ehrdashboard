@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import axios from 'axios'
 import { createAuthenticatedHandler } from '@/lib/auth-middleware'
+import { getApiCredentialsFromRequest } from '@/lib/utils'
 
 const API_BASE_URL = process.env.API_BASE_URL
 const API_URL_PREFIX = process.env.API_URL_PREFIX
-const API_ACCESS_TOKEN = process.env.API_ACCESS_TOKEN
-const API_KEY = process.env.API_KEY
 
 export async function GET(
   request: NextRequest,
@@ -19,7 +18,9 @@ export async function GET(
       return NextResponse.json({ error: 'Appointment ID is required' }, { status: 400 })
     }
     
-    if (!API_BASE_URL || !API_URL_PREFIX || !API_KEY || !API_ACCESS_TOKEN) {
+    const { apiKey, accessToken } = getApiCredentialsFromRequest(request)
+    
+    if (!API_BASE_URL || !API_URL_PREFIX || !apiKey || !accessToken) {
       return NextResponse.json({ error: 'API configuration missing' }, { status: 500 })
     }
     
@@ -27,8 +28,8 @@ export async function GET(
     
     const response = await axios.get(url, {
       headers: {
-        'Authorization': `Bearer ${API_ACCESS_TOKEN}`,
-        'x-api-key': API_KEY,
+        'Authorization': `Bearer ${accessToken}`,
+        'x-api-key': apiKey,
         'Content-Type': 'application/json'
       }
     })
@@ -65,7 +66,9 @@ export async function PUT(
       return NextResponse.json({ error: 'Appointment ID is required' }, { status: 400 })
     }
     
-    if (!API_BASE_URL || !API_URL_PREFIX || !API_KEY || !API_ACCESS_TOKEN) {
+    const { apiKey, accessToken } = getApiCredentialsFromRequest(request)
+    
+    if (!API_BASE_URL || !API_URL_PREFIX || !apiKey || !accessToken) {
       return NextResponse.json({ error: 'API configuration missing' }, { status: 500 })
     }
     
@@ -74,9 +77,9 @@ export async function PUT(
       body,
       {
         headers: {
-          'Authorization': `Bearer ${API_ACCESS_TOKEN}`,
+          'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
-          'x-api-key': API_KEY
+          'x-api-key': apiKey
         }
       }
     )

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import axios from 'axios'
 import { createAuthenticatedHandler } from '@/lib/auth-middleware'
+import { getApiCredentialsFromRequest } from '@/lib/utils'
 
 export async function GET(
   request: NextRequest,
@@ -14,10 +15,9 @@ export async function GET(
       return NextResponse.json({ error: 'Practitioner ID is required' }, { status: 400 })
     }
     
+    const { apiKey, accessToken } = getApiCredentialsFromRequest(request)
     const apiBaseUrl = process.env.API_BASE_URL
     const apiUrlPrefix = process.env.API_URL_PREFIX
-    const apiKey = process.env.API_KEY
-    const accessToken = process.env.API_ACCESS_TOKEN
     
     if (!apiBaseUrl || !apiUrlPrefix || !apiKey || !accessToken) {
       return NextResponse.json({ error: 'API configuration missing' }, { status: 500 })
