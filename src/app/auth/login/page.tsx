@@ -48,7 +48,7 @@ export default function LoginPage() {
         const session = await getSession()
         console.log("📋 Session after login:", session)
         if (session) {
-          router.push("/")
+          router.push("/patients")
           router.refresh()
         }
       }
@@ -125,6 +125,20 @@ export default function LoginPage() {
                 onChange={(e) => setApiKey(e.target.value)}
               />
             </div>
+            <div>
+              <label htmlFor="accessToken" className="sr-only">
+                Access Token (Optional)
+              </label>
+              <input
+                id="accessToken"
+                name="accessToken"
+                type="text"
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                placeholder="Access Token (Optional)"
+                value={accessToken}
+                onChange={(e) => setAccessToken(e.target.value)}
+              />
+            </div>
             <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3 mx-3">
               <div className="flex">
                 <div className="flex-shrink-0">
@@ -141,20 +155,6 @@ export default function LoginPage() {
                   </p>
                 </div>
               </div>
-            </div>
-            <div>
-              <label htmlFor="accessToken" className="sr-only">
-                Access Token (Optional)
-              </label>
-              <input
-                id="accessToken"
-                name="accessToken"
-                type="text"
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Access Token (Optional)"
-                value={accessToken}
-                onChange={(e) => setAccessToken(e.target.value)}
-              />
             </div>
           </div>
 

@@ -98,6 +98,22 @@ export const authOptions: NextAuthOptions = {
         expires: session.expires
       })
       return session
+    },
+    async redirect({ url, baseUrl }) {
+      // If the user is signing in, redirect to /patients
+      if (url === baseUrl || url === `${baseUrl}/`) {
+        return `${baseUrl}/patients`
+      }
+      // If it's a relative URL, make it absolute
+      if (url.startsWith('/')) {
+        return `${baseUrl}${url}`
+      }
+      // If it's the same origin, allow it
+      if (url.startsWith(baseUrl)) {
+        return url
+      }
+      // Otherwise, redirect to /patients
+      return `${baseUrl}/patients`
     }
   },
   pages: {

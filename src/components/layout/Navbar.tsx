@@ -10,7 +10,7 @@ export function Navbar() {
   
   const getBreadcrumbs = () => {
     const segments = pathname.split('/').filter(Boolean)
-    const breadcrumbs = [{ label: 'Dashboard', href: '/' }]
+    const breadcrumbs = [{ label: 'Dashboard', href: '/patients' }]
     
     segments.forEach((segment, index) => {
       const href = '/' + segments.slice(0, index + 1).join('/')
