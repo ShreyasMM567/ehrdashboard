@@ -1,19 +1,36 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/Table'
 import { Plus, Calendar, Clock, User, MapPin, Loader2, Edit, MoreHorizontal } from 'lucide-react'
-import { getAppointments } from '@/lib/api/appointments'
+import { getAppointments, getAppointment, createAppointment, updateAppointment } from '@/lib/api/appointments'
 import { Appointment } from '@/types'
 import { formatDate } from '@/lib/utils'
+import SearchBox from '@/components/ui/SearchBox'
+import { AppointmentDetailModal } from '@/components/modals/AppointmentDetailModal'
+import { Modal } from '@/components/ui/Modal'
+import AppointmentBookingForm from '@/components/forms/AppointmentBookingForm'
+import AppointmentEditForm from '@/components/forms/AppointmentEditForm'
 
 export default function AppointmentsPage() {
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<Appointment[]>([])
+  const [isSearching, setIsSearching] = useState(false)
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
+  const [selectedAppointmentForDetails, setSelectedAppointmentForDetails] = useState<Appointment | null>(null)
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false)
+  const [isCreatingAppointment, setIsCreatingAppointment] = useState(false)
+  const [bookingError, setBookingError] = useState<string | null>(null)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [selectedAppointmentForEdit, setSelectedAppointmentForEdit] = useState<Appointment | null>(null)
+  const [isUpdatingAppointment, setIsUpdatingAppointment] = useState(false)
+  const [editError, setEditError] = useState<string | null>(null)
 
   useEffect(() => {
     fetchAppointments()
@@ -30,6 +47,108 @@ export default function AppointmentsPage() {
       setError('Failed to load appointments')
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const handleSearch = useCallback(async (query: string) => {
+    setSearchQuery(query)
+    if (!query.trim()) {
+      setSearchResults([])
+      return
+    }
+
+    setIsSearching(true)
+    try {
+      const appointment = await getAppointment(query.trim())
+      if (appointment) {
+        setSearchResults([appointment])
+      } else {
+        setSearchResults([])
+      }
+    } catch (error) {
+      console.error('Error searching appointment:', error)
+      setSearchResults([])
+    } finally {
+      setIsSearching(false)
+    }
+  }, [])
+
+  const handleViewAppointmentDetails = (appointment: Appointment) => {
+    setSelectedAppointmentForDetails(appointment)
+    setIsDetailModalOpen(true)
+  }
+
+  const closeDetailModal = () => {
+    setIsDetailModalOpen(false)
+    setSelectedAppointmentForDetails(null)
+  }
+
+  const handleEditAppointment = (appointment: Appointment) => {
+    setSelectedAppointmentForEdit(appointment)
+    setEditError(null)
+    setIsEditModalOpen(true)
+  }
+
+  const closeEditModal = () => {
+    setIsEditModalOpen(false)
+    setSelectedAppointmentForEdit(null)
+    setEditError(null)
+  }
+
+  const handleBookAppointment = () => {
+    setBookingError(null)
+    setIsBookingModalOpen(true)
+  }
+
+  const closeBookingModal = () => {
+    setIsBookingModalOpen(false)
+    setBookingError(null)
+  }
+
+  const handleCreateAppointment = async (data: {
+    patientId: string
+    practitionerId: string
+    startDateTime: string
+    endDateTime: string
+    minutesDuration?: number
+  }) => {
+    setIsCreatingAppointment(true)
+    setBookingError(null)
+    
+    try {
+      await createAppointment(data)
+      // Refresh the appointments list
+      await fetchAppointments()
+      setIsBookingModalOpen(false)
+    } catch (error: any) {
+      console.error('Error creating appointment:', error)
+      setBookingError(error.message || 'Failed to create appointment')
+    } finally {
+      setIsCreatingAppointment(false)
+    }
+  }
+
+  const handleUpdateAppointment = async (data: {
+    status: string
+    start: string
+    end: string
+    minutesDuration: number
+  }) => {
+    if (!selectedAppointmentForEdit) return
+    
+    setIsUpdatingAppointment(true)
+    setEditError(null)
+    
+    try {
+      await updateAppointment(selectedAppointmentForEdit.id, data)
+      // Refresh the appointments list
+      await fetchAppointments()
+      setIsEditModalOpen(false)
+    } catch (error: any) {
+      console.error('Error updating appointment:', error)
+      setEditError(error.message || 'Failed to update appointment')
+    } finally {
+      setIsUpdatingAppointment(false)
     }
   }
 
@@ -128,10 +247,16 @@ export default function AppointmentsPage() {
           <h1 className="text-3xl font-bold text-black">Appointments</h1>
           <p className="text-black mt-1">Manage patient appointments and scheduling</p>
         </div>
-        <Button>
-          <Plus className="h-4 w-4 mr-2" />
-          Book Appointment
-        </Button>
+        <div className="flex items-center space-x-4">
+          <SearchBox
+            placeholder="Search by appointment ID..."
+            onSearch={handleSearch}
+          />
+          <Button onClick={handleBookAppointment}>
+            <Plus className="h-4 w-4 mr-2" />
+            Book Appointment
+          </Button>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -191,14 +316,32 @@ export default function AppointmentsPage() {
           <CardTitle className="text-black">All Appointments</CardTitle>
         </CardHeader>
         <CardContent>
-          {appointments.length === 0 ? (
-            <div className="text-center py-8">
-              <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-black">No appointments scheduled</p>
-              <p className="text-black text-sm mt-1">Book your first appointment to get started</p>
-            </div>
-          ) : (
-            <Table>
+          {(() => {
+            const displayAppointments = searchQuery ? searchResults : appointments
+            const hasResults = displayAppointments.length > 0
+            
+            if (searchQuery && !hasResults && !isSearching) {
+              return (
+                <div className="text-center py-8">
+                  <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-black">No appointment found with ID "{searchQuery}"</p>
+                  <p className="text-black text-sm mt-1">Try searching with a different appointment ID</p>
+                </div>
+              )
+            }
+            
+            if (!searchQuery && appointments.length === 0) {
+              return (
+                <div className="text-center py-8">
+                  <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-black">No appointments scheduled</p>
+                  <p className="text-black text-sm mt-1">Book your first appointment to get started</p>
+                </div>
+              )
+            }
+            
+            return (
+              <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Appointment ID</TableHead>
@@ -213,7 +356,7 @@ export default function AppointmentsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {appointments.map((appointment) => {
+                {displayAppointments.map((appointment) => {
                   const { date, time } = formatDateTime(appointment.start)
                   return (
                     <TableRow key={appointment.id}>
@@ -248,10 +391,20 @@ export default function AppointmentsPage() {
                       </TableCell>
                       <TableCell>
                         <div className="flex space-x-2">
-                          <Button variant="outline" size="sm">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleEditAppointment(appointment)}
+                            title="Edit Appointment"
+                          >
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <Button variant="outline" size="sm">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleViewAppointmentDetails(appointment)}
+                            title="View Details"
+                          >
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </div>
@@ -261,9 +414,48 @@ export default function AppointmentsPage() {
                 })}
               </TableBody>
             </Table>
-          )}
+            )
+          })()}
         </CardContent>
       </Card>
+
+      {/* Appointment Detail Modal */}
+      <AppointmentDetailModal
+        isOpen={isDetailModalOpen}
+        onClose={closeDetailModal}
+        appointment={selectedAppointmentForDetails}
+      />
+
+      {/* Booking Modal */}
+      <Modal
+        isOpen={isBookingModalOpen}
+        onClose={closeBookingModal}
+        title="Book New Appointment"
+        size="lg"
+      >
+        <AppointmentBookingForm
+          onSubmit={handleCreateAppointment}
+          onCancel={closeBookingModal}
+          isLoading={isCreatingAppointment}
+          error={bookingError}
+        />
+      </Modal>
+
+      {/* Edit Modal */}
+      <Modal
+        isOpen={isEditModalOpen}
+        onClose={closeEditModal}
+        title="Edit Appointment"
+        size="lg"
+      >
+        <AppointmentEditForm
+          appointment={selectedAppointmentForEdit}
+          onSubmit={handleUpdateAppointment}
+          onCancel={closeEditModal}
+          isLoading={isUpdatingAppointment}
+          error={editError}
+        />
+      </Modal>
       </div>
     </DashboardLayout>
   )

@@ -157,3 +157,73 @@ export async function getAppointment(id: string): Promise<Appointment | null> {
     return null
   }
 }
+
+// Function to create a new appointment
+export async function createAppointment(appointmentData: {
+  patientId: string
+  practitionerId: string
+  startDateTime: string
+  endDateTime: string
+  minutesDuration?: number
+}) {
+  try {
+    const response = await axios.post('/api/appointments', appointmentData)
+    return response.data
+  } catch (error: any) {
+    console.error('Error creating appointment:', error)
+    
+    // Handle specific booking unavailable error
+    if (error.response?.status === 409 && error.response?.data?.error === 'BOOKING_UNAVAILABLE') {
+      throw new Error('BOOKING_UNAVAILABLE')
+    }
+    
+    // Handle validation errors
+    if (error.response?.status === 404) {
+      throw new Error('Patient or practitioner not found')
+    }
+    
+    throw error
+  }
+}
+
+// Function to update an existing appointment
+export async function updateAppointment(id: string, updates: {
+  status?: string
+  start?: string
+  end?: string
+  minutesDuration?: number
+}) {
+  try {
+    // First, get the current appointment data to merge with updates
+    const currentAppointment = await getAppointment(id)
+    if (!currentAppointment) {
+      throw new Error('Appointment not found')
+    }
+    
+    // Get the full FHIR appointment data
+    const response = await axios.get(`/api/appointments/${id}`)
+    const fhirAppointment = response.data
+    
+    // Update only the fields that are provided in the request
+    const updatedFhirAppointment = {
+      ...fhirAppointment,
+      status: updates.status || fhirAppointment.status,
+      start: updates.start || fhirAppointment.start,
+      end: updates.end || fhirAppointment.end,
+      minutesDuration: updates.minutesDuration || fhirAppointment.minutesDuration
+    }
+    
+    console.log('Sending FHIR appointment update:', JSON.stringify(updatedFhirAppointment, null, 2))
+    
+    const putResponse = await axios.put(`/api/appointments/${id}`, updatedFhirAppointment)
+    return putResponse.data
+  } catch (error: any) {
+    console.error('Error updating appointment:', error)
+    
+    if (error.response?.status === 404) {
+      throw new Error('Appointment not found')
+    }
+    
+    throw error
+  }
+}
