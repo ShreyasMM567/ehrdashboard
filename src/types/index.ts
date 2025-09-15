@@ -5,22 +5,28 @@ export interface Patient {
   birthDate: string
   email: string
   phone: string
+  address?: {
+    city?: string
+    state?: string
+    postalCode?: string
+    country?: string
+    line?: string[]
+  }
 }
 
 export interface Appointment {
   id: string
-  patientId: string
-  patientName: string
-  providerId: string
-  providerName: string
-  date: string
-  time: string
-  duration: number
-  type: 'consultation' | 'follow-up' | 'procedure' | 'checkup'
-  status: 'scheduled' | 'confirmed' | 'completed' | 'cancelled' | 'no-show'
-  notes?: string
-  createdAt: string
-  updatedAt: string
+  status: string
+  start: string
+  end: string
+  patientId?: string
+  patientName?: string
+  practitionerId?: string
+  practitionerName?: string
+  description?: string
+  serviceType?: string
+  location?: string
+  minutesDuration?: number
 }
 
 export interface ClinicalNote {

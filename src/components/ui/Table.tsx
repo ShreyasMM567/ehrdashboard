@@ -29,6 +29,7 @@ interface TableHeadProps {
 interface TableCellProps {
   children: React.ReactNode
   className?: string
+  colSpan?: number
 }
 
 const Table = React.forwardRef<HTMLTableElement, TableProps>(
@@ -101,10 +102,11 @@ const TableHead = React.forwardRef<HTMLTableCellElement, TableHeadProps>(
 TableHead.displayName = 'TableHead'
 
 const TableCell = React.forwardRef<HTMLTableCellElement, TableCellProps>(
-  ({ className, children, ...props }, ref) => (
+  ({ className, children, colSpan, ...props }, ref) => (
     <td
       ref={ref}
       className={cn('p-4 align-middle text-black [&:has([role=checkbox])]:pr-0', className)}
+      colSpan={colSpan}
       {...props}
     >
       {children}

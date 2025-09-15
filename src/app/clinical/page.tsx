@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/Button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/Table'
 import { Modal } from '@/components/ui/Modal'
 import { VitalsForm } from '@/components/forms/VitalsForm'
-import { AllergyForm } from '@/components/forms/AllergyForm'
+import AllergyForm from '@/components/forms/AllergyForm'
 import { MedicationForm } from '@/components/forms/MedicationForm'
 import { usePatients } from '@/hooks/usePatients'
 import { Plus, Heart, AlertTriangle, Pill } from 'lucide-react'
@@ -87,7 +87,11 @@ export default function ClinicalPage() {
       case 'vitals':
         return <VitalsForm onSubmit={() => {}} onCancel={() => setIsModalOpen(false)} />
       case 'allergies':
-        return <AllergyForm onSubmit={() => {}} onCancel={() => setIsModalOpen(false)} />
+        return <AllergyForm 
+          patientId={selectedPatient} 
+          onSubmit={async () => {}} 
+          onCancel={() => setIsModalOpen(false)} 
+        />
       case 'medications':
         return <MedicationForm onSubmit={() => {}} onCancel={() => setIsModalOpen(false)} />
       default:

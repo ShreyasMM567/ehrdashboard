@@ -1,5 +1,5 @@
 import useSWR from 'swr'
-import { getPatients, getPatient, createPatient, updatePatient, deletePatient } from '@/lib/api/patients'
+import { getPatients, getPatient, createPatient, updatePatient, deletePatient, searchPatientById } from '@/lib/api/patients'
 import { Patient } from '@/types'
 
 export function usePatients() {
@@ -53,4 +53,18 @@ export function usePatientMutations() {
   }
   
   return { create, update, remove }
+}
+
+export function usePatientSearch(searchId: string) {
+  const { data, error, isLoading, mutate } = useSWR<Patient | null>(
+    searchId ? `patient-search-${searchId}` : null,
+    () => searchPatientById(searchId)
+  )
+  
+  return {
+    searchResult: data,
+    isSearching: isLoading,
+    searchError: error,
+    mutate
+  }
 }

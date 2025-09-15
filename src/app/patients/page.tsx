@@ -9,10 +9,12 @@ import { Modal } from '@/components/ui/Modal'
 import { SuccessPopup } from '@/components/ui/SuccessPopup'
 import { EditSuccessPopup } from '@/components/ui/EditSuccessPopup'
 import { PatientForm } from '@/components/forms/PatientForm'
-import { usePatients, usePatientMutations } from '@/hooks/usePatients'
+import { usePatients, usePatientMutations, usePatientSearch } from '@/hooks/usePatients'
 import { Patient } from '@/types'
-import { Plus, Edit, Trash2, Eye } from 'lucide-react'
+import { Plus, Edit, MoreHorizontal } from 'lucide-react'
 import { formatDate, formatPhoneNumber } from '@/lib/utils'
+import SearchBox from '@/components/ui/SearchBox'
+import PatientDetailModal from '@/components/modals/PatientDetailModal'
 
 export default function PatientsPage() {
   const { patients, isLoading, error } = usePatients()
@@ -24,6 +26,10 @@ export default function PatientsPage() {
   const [createdPatient, setCreatedPatient] = useState<{ name: string; id: string } | null>(null)
   const [showEditSuccessPopup, setShowEditSuccessPopup] = useState(false)
   const [editedPatient, setEditedPatient] = useState<{ name: string; id: string; updatedFields: string[] } | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
+  const { searchResult, isSearching, searchError } = usePatientSearch(searchQuery)
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
+  const [selectedPatientForDetails, setSelectedPatientForDetails] = useState<Patient | null>(null)
 
   const handleAddPatient = () => {
     setSelectedPatient(null)
@@ -37,60 +43,49 @@ export default function PatientsPage() {
     setIsModalOpen(true)
   }
 
-  const handleDeletePatient = async (patient: Patient) => {
-    if (window.confirm(`Are you sure you want to delete ${patient.given} ${patient.family}?`)) {
-      await remove(patient.id)
-    }
+  const handleViewPatientDetails = (patient: Patient) => {
+    setSelectedPatientForDetails(patient)
+    setIsDetailModalOpen(true)
   }
+
+  const handleSearch = (query: string) => setSearchQuery(query)
+  
+  const closeModal = () => {
+    setIsModalOpen(false)
+    setSelectedPatient(null)
+    setIsEditing(false)
+  }
+
+  const closeDetailModal = () => {
+    setIsDetailModalOpen(false)
+    setSelectedPatientForDetails(null)
+  }
+
+  // Display logic
+  const isSearchingMode = searchQuery.trim() !== ''
+  const displayPatients = isSearchingMode 
+    ? (searchResult ? [searchResult] : [])
+    : patients
+  const isDisplayLoading = isSearchingMode ? isSearching : isLoading
+  const displayError = isSearchingMode ? searchError : error
 
   const handleSubmit = async (data: Omit<Patient, 'id'>) => {
     if (isEditing && selectedPatient) {
-      // Track which fields were updated with better comparison
+      // Track which fields were updated
       const updatedFields: string[] = []
       
-      console.log('Comparing fields:')
-      console.log('Original patient:', selectedPatient)
-      console.log('New data:', data)
-      
-      if (data.family !== selectedPatient.family) {
-        console.log('Family changed:', selectedPatient.family, '->', data.family)
-        updatedFields.push('family name')
-      }
-      if (data.given !== selectedPatient.given) {
-        console.log('Given changed:', selectedPatient.given, '->', data.given)
-        updatedFields.push('given name')
-      }
-      if (data.birthDate !== selectedPatient.birthDate) {
-        console.log('Birth date changed:', selectedPatient.birthDate, '->', data.birthDate)
-        updatedFields.push('birth date')
-      }
-      if (data.email !== selectedPatient.email) {
-        console.log('Email changed:', selectedPatient.email, '->', data.email)
-        updatedFields.push('email')
-      }
-      if (data.phone !== selectedPatient.phone) {
-        console.log('Phone changed:', selectedPatient.phone, '->', data.phone)
-        updatedFields.push('phone')
-      }
-      
-      console.log('Updated fields detected:', updatedFields)
+      if (data.family !== selectedPatient.family) updatedFields.push('family name')
+      if (data.given !== selectedPatient.given) updatedFields.push('given name')
+      if (data.birthDate !== selectedPatient.birthDate) updatedFields.push('birth date')
+      if (data.email !== selectedPatient.email) updatedFields.push('email')
+      if (data.phone !== selectedPatient.phone) updatedFields.push('phone')
       
       const updatedPatient = await update(selectedPatient.id, data)
       
-      // Show edit success popup
       if (updatedPatient) {
-        // Use updated patient data, but fallback to original if names are empty
         const patientName = (updatedPatient.given && updatedPatient.family) 
           ? `${updatedPatient.given} ${updatedPatient.family}`
           : `${selectedPatient.given} ${selectedPatient.family}`
-        
-        console.log('Setting edited patient popup:', {
-          name: patientName,
-          id: updatedPatient.id,
-          updatedFields: updatedFields,
-          updatedPatientData: updatedPatient,
-          originalPatientData: selectedPatient
-        })
         
         setEditedPatient({
           name: patientName,
@@ -101,19 +96,17 @@ export default function PatientsPage() {
       }
     } else {
       const newPatient = await create(data)
-      // Show success popup for newly created patient
       setCreatedPatient({
         name: `${newPatient.given} ${newPatient.family}`,
         id: newPatient.id
       })
       setShowSuccessPopup(true)
     }
-    setIsModalOpen(false)
-    setSelectedPatient(null)
-    setIsEditing(false)
+    
+    closeModal()
   }
 
-  if (error) {
+  if (displayError && !isSearchingMode) {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-64">
@@ -141,23 +134,49 @@ export default function PatientsPage() {
           </Button>
         </div>
 
+        {/* Search Box */}
+        <Card>
+          <CardContent className="pt-6">
+            <div className="max-w-md">
+              <SearchBox
+                placeholder="Search by patient ID..."
+                onSearch={handleSearch}
+                debounceMs={500}
+              />
+              {isSearchingMode && (
+                <p className="text-sm text-black mt-2">
+                  {isSearching ? 'Searching...' : 
+                   searchResult ? `Found patient: ${searchResult.given} ${searchResult.family}` :
+                   searchError ? 'Patient not found' : 'No results'}
+                </p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Patients Table */}
         <Card>
           <CardHeader>
             <CardTitle>Patient Directory</CardTitle>
           </CardHeader>
           <CardContent>
-            {isLoading ? (
+            {isDisplayLoading ? (
               <div className="flex items-center justify-center h-32">
-                <div className="text-black">Loading patients...</div>
+                <div className="text-black">
+                  {isSearchingMode ? 'Searching for patient...' : 'Loading patients...'}
+                </div>
               </div>
-            ) : !Array.isArray(patients) || patients.length === 0 ? (
+            ) : !Array.isArray(displayPatients) || displayPatients.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-black mb-4">No patients found</p>
-                <Button onClick={handleAddPatient}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add First Patient
-                </Button>
+                <p className="text-black mb-4">
+                  {isSearchingMode ? 'No patient found with that ID' : 'No patients found'}
+                </p>
+                {!isSearchingMode && (
+                  <Button onClick={handleAddPatient}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add First Patient
+                  </Button>
+                )}
               </div>
             ) : (
               <Table>
@@ -171,7 +190,7 @@ export default function PatientsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {Array.isArray(patients) ? patients.map((patient) => (
+                  {Array.isArray(displayPatients) ? displayPatients.map((patient) => (
                     <TableRow key={patient.id}>
                       <TableCell className="font-medium">
                         {patient.given} {patient.family}
@@ -185,15 +204,17 @@ export default function PatientsPage() {
                             variant="ghost"
                             size="sm"
                             onClick={() => handleEditPatient(patient)}
+                            title="Edit Patient"
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleDeletePatient(patient)}
+                            onClick={() => handleViewPatientDetails(patient)}
+                            title="View Patient Details"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </div>
                       </TableCell>
@@ -214,22 +235,14 @@ export default function PatientsPage() {
         {/* Patient Form Modal */}
         <Modal
           isOpen={isModalOpen}
-          onClose={() => {
-            setIsModalOpen(false)
-            setSelectedPatient(null)
-            setIsEditing(false)
-          }}
+          onClose={closeModal}
           title={isEditing ? 'Edit Patient' : 'Add New Patient'}
           size="lg"
         >
           <PatientForm
             patient={selectedPatient}
             onSubmit={handleSubmit}
-            onCancel={() => {
-              setIsModalOpen(false)
-              setSelectedPatient(null)
-              setIsEditing(false)
-            }}
+            onCancel={closeModal}
           />
         </Modal>
 
@@ -261,6 +274,13 @@ export default function PatientsPage() {
             duration={5000}
           />
         )}
+
+        {/* Patient Detail Modal */}
+        <PatientDetailModal
+          isOpen={isDetailModalOpen}
+          onClose={closeDetailModal}
+          patient={selectedPatientForDetails}
+        />
       </div>
     </DashboardLayout>
   )

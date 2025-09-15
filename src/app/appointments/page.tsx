@@ -1,77 +1,118 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/Table'
-import { Modal } from '@/components/ui/Modal'
-import { AppointmentForm } from '@/components/forms/AppointmentForm'
-import { useAppointments, useAppointmentMutations } from '@/hooks/useAppointments'
+import { Plus, Calendar, Clock, User, MapPin, Loader2, Edit, MoreHorizontal } from 'lucide-react'
+import { getAppointments } from '@/lib/api/appointments'
 import { Appointment } from '@/types'
-import { Plus, Edit, Trash2, Calendar } from 'lucide-react'
-import { formatDate, formatDateTime } from '@/lib/utils'
+import { formatDate } from '@/lib/utils'
 
 export default function AppointmentsPage() {
-  const { appointments, isLoading, error } = useAppointments()
-  const { create, update, remove } = useAppointmentMutations()
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null)
-  const [isEditing, setIsEditing] = useState(false)
+  const [appointments, setAppointments] = useState<Appointment[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  const handleBookAppointment = () => {
-    setSelectedAppointment(null)
-    setIsEditing(false)
-    setIsModalOpen(true)
-  }
+  useEffect(() => {
+    fetchAppointments()
+  }, [])
 
-  const handleEditAppointment = (appointment: Appointment) => {
-    setSelectedAppointment(appointment)
-    setIsEditing(true)
-    setIsModalOpen(true)
-  }
-
-  const handleDeleteAppointment = async (appointment: Appointment) => {
-    if (window.confirm(`Are you sure you want to cancel this appointment with ${appointment.patientName}?`)) {
-      await remove(appointment.id)
+  const fetchAppointments = async () => {
+    try {
+      setIsLoading(true)
+      setError(null)
+      const data = await getAppointments()
+      setAppointments(data)
+    } catch (err) {
+      console.error('Error fetching appointments:', err)
+      setError('Failed to load appointments')
+    } finally {
+      setIsLoading(false)
     }
-  }
-
-  const handleSubmit = async (data: Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'>) => {
-    if (isEditing && selectedAppointment) {
-      await update(selectedAppointment.id, data)
-    } else {
-      await create(data)
-    }
-    setIsModalOpen(false)
-    setSelectedAppointment(null)
-    setIsEditing(false)
   }
 
   const getStatusColor = (status: string) => {
-    switch (status) {
+    switch (status.toLowerCase()) {
       case 'scheduled':
+      case 'booked':
         return 'bg-blue-100 text-blue-800'
       case 'confirmed':
         return 'bg-green-100 text-green-800'
       case 'completed':
-        return 'bg-gray-100 text-black'
+        return 'bg-gray-100 text-gray-800'
       case 'cancelled':
         return 'bg-red-100 text-red-800'
       case 'no-show':
+        return 'bg-yellow-100 text-yellow-800'
+      case 'arrived':
+        return 'bg-purple-100 text-purple-800'
+      case 'in-progress':
         return 'bg-orange-100 text-orange-800'
       default:
-        return 'bg-gray-100 text-black'
+        return 'bg-gray-100 text-gray-800'
     }
+  }
+
+  const formatDateTime = (dateTime: string) => {
+    try {
+      const date = new Date(dateTime)
+      return {
+        date: date.toLocaleDateString(),
+        time: date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }
+    } catch {
+      return { date: 'Invalid Date', time: 'Invalid Time' }
+    }
+  }
+
+  const formatDuration = (minutes?: number) => {
+    if (!minutes) return 'N/A'
+    if (minutes < 60) return `${minutes} min`
+    const hours = Math.floor(minutes / 60)
+    const remainingMinutes = minutes % 60
+    return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}m` : `${hours}h`
+  }
+
+  // Calculate stats
+  const totalAppointments = appointments.length
+  const today = new Date().toDateString()
+  const todayAppointments = appointments.filter(apt => {
+    const aptDate = new Date(apt.start).toDateString()
+    return aptDate === today
+  }).length
+  
+  const confirmedAppointments = appointments.filter(apt => 
+    apt.status.toLowerCase() === 'confirmed'
+  ).length
+  
+  const pendingAppointments = appointments.filter(apt => 
+    ['scheduled', 'booked'].includes(apt.status.toLowerCase())
+  ).length
+
+  if (isLoading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
+            <p className="text-black">Loading appointments...</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    )
   }
 
   if (error) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center h-64">
+        <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
-            <p className="text-red-600 mb-4">Error loading appointments</p>
-            <Button onClick={() => window.location.reload()}>Retry</Button>
+            <p className="text-red-600 mb-4">{error}</p>
+            <Button onClick={fetchAppointments}>
+              Try Again
+            </Button>
           </div>
         </div>
       </DashboardLayout>
@@ -81,121 +122,148 @@ export default function AppointmentsPage() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        {/* Page Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-black">Appointments</h1>
-            <p className="text-black mt-2">Manage patient appointments and scheduling</p>
-          </div>
-          <Button onClick={handleBookAppointment}>
-            <Plus className="h-4 w-4 mr-2" />
-            Book Appointment
-          </Button>
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold text-black">Appointments</h1>
+          <p className="text-black mt-1">Manage patient appointments and scheduling</p>
         </div>
+        <Button>
+          <Plus className="h-4 w-4 mr-2" />
+          Book Appointment
+        </Button>
+      </div>
 
-        {/* Today's Appointments */}
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Calendar className="h-5 w-5 mr-2" />
-              Today's Appointments
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="flex items-center justify-center h-32">
-                <div className="text-black">Loading appointments...</div>
+          <CardContent className="p-6">
+            <div className="flex items-center">
+              <Calendar className="h-8 w-8 text-blue-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-black">Total Appointments</p>
+                <p className="text-2xl font-bold text-black">{totalAppointments}</p>
               </div>
-            ) : appointments.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-black mb-4">No appointments scheduled</p>
-                <Button onClick={handleBookAppointment}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Book First Appointment
-                </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center">
+              <Clock className="h-8 w-8 text-green-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-black">Scheduled Today</p>
+                <p className="text-2xl font-bold text-black">{todayAppointments}</p>
               </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Patient</TableHead>
-                    <TableHead>Provider</TableHead>
-                    <TableHead>Date & Time</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {appointments.map((appointment) => (
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center">
+              <User className="h-8 w-8 text-purple-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-black">Confirmed</p>
+                <p className="text-2xl font-bold text-black">{confirmedAppointments}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center">
+              <MapPin className="h-8 w-8 text-orange-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-black">Pending</p>
+                <p className="text-2xl font-bold text-black">{pendingAppointments}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Appointments Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-black">All Appointments</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {appointments.length === 0 ? (
+            <div className="text-center py-8">
+              <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-black">No appointments scheduled</p>
+              <p className="text-black text-sm mt-1">Book your first appointment to get started</p>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Appointment ID</TableHead>
+                  <TableHead>Date & Time</TableHead>
+                  <TableHead>Duration</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Patient</TableHead>
+                  <TableHead>Practitioner</TableHead>
+                  <TableHead>Service Type</TableHead>
+                  <TableHead>Location</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {appointments.map((appointment) => {
+                  const { date, time } = formatDateTime(appointment.start)
+                  return (
                     <TableRow key={appointment.id}>
-                      <TableCell className="font-medium">
-                        {appointment.patientName}
+                      <TableCell className="font-medium text-black">
+                        {appointment.id}
                       </TableCell>
-                      <TableCell>{appointment.providerName}</TableCell>
-                      <TableCell>
+                      <TableCell className="text-black">
                         <div>
-                          <div>{formatDate(appointment.date)}</div>
-                          <div className="text-sm text-black">
-                            {appointment.time} ({appointment.duration} min)
-                          </div>
+                          <div>{date}</div>
+                          <div className="text-sm text-gray-600">{time}</div>
                         </div>
                       </TableCell>
-                      <TableCell>
-                        <span className="capitalize">{appointment.type}</span>
+                      <TableCell className="text-black">
+                        {formatDuration(appointment.minutesDuration)}
                       </TableCell>
                       <TableCell>
-                        <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(appointment.status)}`}>
+                        <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(appointment.status)}`}>
                           {appointment.status}
                         </span>
                       </TableCell>
+                      <TableCell className="text-black">
+                        {appointment.patientName || 'Unknown Patient'}
+                      </TableCell>
+                      <TableCell className="text-black">
+                        {appointment.practitionerName || 'Unknown Practitioner'}
+                      </TableCell>
+                      <TableCell className="text-black">
+                        {appointment.serviceType || 'N/A'}
+                      </TableCell>
+                      <TableCell className="text-black">
+                        {appointment.location || 'N/A'}
+                      </TableCell>
                       <TableCell>
-                        <div className="flex items-center space-x-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEditAppointment(appointment)}
-                          >
+                        <div className="flex space-x-2">
+                          <Button variant="outline" size="sm">
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDeleteAppointment(appointment)}
-                          >
-                            <Trash2 className="h-4 w-4" />
+                          <Button variant="outline" size="sm">
+                            <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </div>
                       </TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Appointment Form Modal */}
-        <Modal
-          isOpen={isModalOpen}
-          onClose={() => {
-            setIsModalOpen(false)
-            setSelectedAppointment(null)
-            setIsEditing(false)
-          }}
-          title={isEditing ? 'Edit Appointment' : 'Book New Appointment'}
-          size="lg"
-        >
-          <AppointmentForm
-            appointment={selectedAppointment}
-            onSubmit={handleSubmit}
-            onCancel={() => {
-              setIsModalOpen(false)
-              setSelectedAppointment(null)
-              setIsEditing(false)
-            }}
-          />
-        </Modal>
+                  )
+                })}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
       </div>
     </DashboardLayout>
   )

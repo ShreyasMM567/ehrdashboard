@@ -20,7 +20,14 @@ export async function getPatients(): Promise<Patient[]> {
           given: resource.name?.[0]?.given?.[0] || '',
           birthDate: resource.birthDate || '',
           email: resource.telecom?.find((t: any) => t.system === 'email')?.value || '',
-          phone: resource.telecom?.find((t: any) => t.system === 'phone')?.value || ''
+          phone: resource.telecom?.find((t: any) => t.system === 'phone')?.value || '',
+          address: resource.address?.[0] ? {
+            city: resource.address[0].city || '',
+            state: resource.address[0].state || '',
+            postalCode: resource.address[0].postalCode || '',
+            country: resource.address[0].country || '',
+            line: resource.address[0].line || []
+          } : undefined
         }
       })
     }
@@ -57,7 +64,14 @@ export async function getPatient(id: string): Promise<Patient | null> {
       given: resource.name?.[0]?.given?.[0] || '',
       birthDate: resource.birthDate || '',
       email: resource.telecom?.find((t: any) => t.system === 'email')?.value || '',
-      phone: resource.telecom?.find((t: any) => t.system === 'phone')?.value || ''
+      phone: resource.telecom?.find((t: any) => t.system === 'phone')?.value || '',
+      address: resource.address?.[0] ? {
+        city: resource.address[0].city || '',
+        state: resource.address[0].state || '',
+        postalCode: resource.address[0].postalCode || '',
+        country: resource.address[0].country || '',
+        line: resource.address[0].line || []
+      } : undefined
     }
   } catch (error) {
     console.error('Error fetching patient:', error)
@@ -179,6 +193,32 @@ export async function updatePatient(id: string, updates: Partial<Patient>): Prom
   } catch (error) {
     console.error('Error updating patient:', error)
     throw error
+  }
+}
+
+export async function searchPatientById(id: string): Promise<Patient | null> {
+  try {
+    if (!id.trim()) {
+      return null
+    }
+    
+    console.log('Searching for patient with ID:', id)
+    const response = await axios.get(`/api/patients/${id}`)
+    const resource = response.data
+    
+    console.log('Search response:', resource)
+    
+    return {
+      id: resource.id,
+      family: resource.name?.[0]?.family || '',
+      given: resource.name?.[0]?.given?.[0] || '',
+      birthDate: resource.birthDate || '',
+      email: resource.telecom?.find((t: any) => t.system === 'email')?.value || '',
+      phone: resource.telecom?.find((t: any) => t.system === 'phone')?.value || ''
+    }
+  } catch (error) {
+    console.error('Error searching for patient:', error)
+    return null
   }
 }
 
