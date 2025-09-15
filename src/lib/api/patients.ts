@@ -1,17 +1,40 @@
 import axios from 'axios'
 import { Patient } from '@/types'
 
-export async function getPatients(): Promise<Patient[]> {
+export interface PaginationParams {
+  count?: number
+  page?: number
+}
+
+export interface PaginatedResponse<T> {
+  data: T[]
+  total: number
+  page: number
+  count: number
+  hasNext: boolean
+  hasPrev: boolean
+}
+
+export async function getPatients(params?: PaginationParams): Promise<PaginatedResponse<Patient>> {
   try {
-    const response = await axios.get('/api/patients')
-    console.log('API Response:', response.data)
-    console.log('Response type:', typeof response.data)
-    console.log('Is array:', Array.isArray(response.data))
+    const count = params?.count || 10
+    const page = params?.page || 1
+    
+    const queryParams = new URLSearchParams({
+      _count: count.toString(),
+      page: page.toString()
+    })
+    
+    const url = `/api/patients?${queryParams.toString()}`
+    const response = await axios.get(url)
+    
+    let patients: Patient[] = []
+    let total = 0
     
     // Handle FHIR Bundle response format
     if (response.data && response.data.entry && Array.isArray(response.data.entry)) {
       console.log('Processing FHIR Bundle with', response.data.entry.length, 'entries')
-      return response.data.entry.map((entry: any) => {
+      patients = response.data.entry.map((entry: any) => {
         const resource = entry.resource
         console.log('Processing patient resource:', resource.id)
         return {
@@ -30,12 +53,12 @@ export async function getPatients(): Promise<Patient[]> {
           } : undefined
         }
       })
-    }
-    
-    // Handle case where response.data is already an array
-    if (Array.isArray(response.data)) {
+      
+      // Extract total from FHIR Bundle
+      total = response.data.total || patients.length
+    } else if (Array.isArray(response.data)) {
       console.log('Response is already an array with', response.data.length, 'items')
-      return response.data.map((patient: any) => ({
+      patients = response.data.map((patient: any) => ({
         id: patient.id,
         family: patient.family || '',
         given: patient.given || '',
@@ -43,13 +66,39 @@ export async function getPatients(): Promise<Patient[]> {
         email: patient.email || '',
         phone: patient.phone || ''
       }))
+      total = patients.length
+    } else {
+      console.log('Unexpected response format:', response.data)
+      patients = []
+      total = 0
     }
     
-    console.log('Unexpected response format:', response.data)
-    return []
+    // If we don't have a reliable total, estimate based on current page and results
+    const estimatedTotal = total > 0 ? total : (patients.length === count ? page * count + 1 : page * count)
+    
+    // Simple pagination logic: if we got a full page, assume there might be more
+    const hasNext = patients.length === count
+    const hasPrev = page > 1
+    
+    
+    return {
+      data: patients,
+      total: estimatedTotal,
+      page,
+      count,
+      hasNext,
+      hasPrev
+    }
   } catch (error) {
     console.error('Error fetching patients:', error)
-    return []
+    return {
+      data: [],
+      total: 0,
+      page: 1,
+      count: 10,
+      hasNext: false,
+      hasPrev: false
+    }
   }
 }
 

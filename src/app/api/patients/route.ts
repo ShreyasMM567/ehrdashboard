@@ -6,10 +6,20 @@ const API_URL_PREFIX = process.env.API_URL_PREFIX
 const API_ACCESS_TOKEN = process.env.API_ACCESS_TOKEN
 const API_KEY = process.env.API_KEY
 // GET /api/patients
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url)
+    const count = searchParams.get('_count') || '10'
+    const page = searchParams.get('page') || '1'
+    
+    // Build query parameters for FHIR API
+    const queryParams = new URLSearchParams({
+      _count: count,
+      page: page
+    })
+    
     const response = await axios.get(
-      `${API_BASE_URL}/${API_URL_PREFIX}/ema/fhir/v2/Patient`,
+      `${API_BASE_URL}/${API_URL_PREFIX}/ema/fhir/v2/Patient?${queryParams.toString()}`,
       {
         headers: {
           'Authorization': `Bearer ${API_ACCESS_TOKEN}`,

@@ -1,12 +1,20 @@
 import useSWR from 'swr'
-import { getPatients, getPatient, createPatient, updatePatient, deletePatient, searchPatientById } from '@/lib/api/patients'
+import { getPatients, getPatient, createPatient, updatePatient, deletePatient, searchPatientById, PaginationParams, PaginatedResponse } from '@/lib/api/patients'
 import { Patient } from '@/types'
 
-export function usePatients() {
-  const { data, error, isLoading, mutate } = useSWR<Patient[]>('patients', getPatients)
+export function usePatients(params?: PaginationParams) {
+  const key = params ? `patients-${params.page}-${params.count}` : 'patients'
+  const { data, error, isLoading, mutate } = useSWR<PaginatedResponse<Patient>>(key, () => getPatients(params))
   
   return {
-    patients: data || [],
+    patients: data?.data || [],
+    pagination: data ? {
+      total: data.total,
+      page: data.page,
+      count: data.count,
+      hasNext: data.hasNext,
+      hasPrev: data.hasPrev
+    } : null,
     isLoading,
     error,
     mutate

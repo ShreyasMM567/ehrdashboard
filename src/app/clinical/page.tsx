@@ -8,13 +8,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Modal } from '@/components/ui/Modal'
 import { VitalsForm } from '@/components/forms/VitalsForm'
 import AllergyForm from '@/components/forms/AllergyForm'
-import { MedicationForm } from '@/components/forms/MedicationForm'
+import MedicationForm from '@/components/forms/MedicationForm'
 import { usePatients } from '@/hooks/usePatients'
 import { Plus, Heart, AlertTriangle, Pill } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
 
 export default function ClinicalPage() {
-  const { patients } = usePatients()
+  const { patients } = usePatients({ page: 1, count: 10 })
   const [activeTab, setActiveTab] = useState<'vitals' | 'allergies' | 'medications'>('vitals')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedPatient, setSelectedPatient] = useState<string>('')
@@ -93,7 +93,7 @@ export default function ClinicalPage() {
           onCancel={() => setIsModalOpen(false)} 
         />
       case 'medications':
-        return <MedicationForm onSubmit={() => {}} onCancel={() => setIsModalOpen(false)} />
+        return <MedicationForm patientId={selectedPatient} onSubmit={async () => {}} onCancel={() => setIsModalOpen(false)} />
       default:
         return null
     }

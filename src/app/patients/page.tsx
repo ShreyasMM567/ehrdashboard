@@ -15,9 +15,17 @@ import { Plus, Edit, MoreHorizontal } from 'lucide-react'
 import { formatDate, formatPhoneNumber } from '@/lib/utils'
 import SearchBox from '@/components/ui/SearchBox'
 import PatientDetailModal from '@/components/modals/PatientDetailModal'
+import { Pagination } from '@/components/ui/Pagination'
 
 export default function PatientsPage() {
-  const { patients, isLoading, error } = usePatients()
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize] = useState(10)
+  
+  const { patients, pagination, isLoading, error } = usePatients({ 
+    page: currentPage, 
+    count: pageSize 
+  })
+  
   const { create, update, remove } = usePatientMutations()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null)
@@ -49,6 +57,10 @@ export default function PatientsPage() {
   }
 
   const handleSearch = (query: string) => setSearchQuery(query)
+  
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+  }
   
   const closeModal = () => {
     setIsModalOpen(false)
@@ -230,6 +242,16 @@ export default function PatientsPage() {
               </Table>
             )}
           </CardContent>
+          
+          {/* Pagination */}
+          {!isSearchingMode && pagination && (
+            <Pagination
+              currentPage={pagination.page}
+              onPageChange={handlePageChange}
+              hasNext={pagination.hasNext}
+              hasPrev={pagination.hasPrev}
+            />
+          )}
         </Card>
 
         {/* Patient Form Modal */}
