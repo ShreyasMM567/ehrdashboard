@@ -165,7 +165,7 @@ export default function LoginPage() {
           <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
             <h3 className="text-sm font-medium text-blue-800 mb-2">Demo Credentials:</h3>
             <p className="text-sm text-blue-700">
-              <strong>Email:</strong> admin<br />
+              <strong>Email:</strong> admin@admin.com<br />
               <strong>Password:</strong> password123
             </p>
           </div>
