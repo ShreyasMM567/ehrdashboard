@@ -5,118 +5,40 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/Table'
-import { Modal } from '@/components/ui/Modal'
-import { BillingForm } from '@/components/forms/BillingForm'
-import { InsuranceForm } from '@/components/forms/InsuranceForm'
-import { CreditCard, FileText, Shield, DollarSign } from 'lucide-react'
+import { CreditCard, FileText, Shield, DollarSign, Search, User, CreditCard as CreditCardIcon, Shield as ShieldIcon } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
+import SearchBox from '@/components/ui/SearchBox'
+import { useAccountInfo, useCoverageInfo } from '@/hooks/useBilling'
 
 export default function BillingPage() {
-  const [activeTab, setActiveTab] = useState<'billing' | 'insurance' | 'reports'>('billing')
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchedPatientId, setSearchedPatientId] = useState('')
+  
+  // Use hooks to fetch account and coverage info
+  const { accountInfo, isLoading: accountLoading, error: accountError } = useAccountInfo(searchedPatientId)
+  const { coverageInfo, isLoading: coverageLoading, error: coverageError } = useCoverageInfo(searchedPatientId)
 
-  // Mock data for billing records
-  const mockBillingRecords = [
-    {
-      id: '1',
-      patientId: '1',
-      patientName: 'John Doe',
-      serviceDate: '2024-01-15',
-      service: 'Office Visit - Consultation',
-      amount: 200,
-      insuranceCoverage: 160,
-      patientResponsibility: 40,
-      status: 'paid',
-      dueDate: '2024-02-15',
-      createdAt: '2024-01-15T10:00:00Z'
-    },
-    {
-      id: '2',
-      patientId: '2',
-      patientName: 'Sarah Smith',
-      serviceDate: '2024-01-16',
-      service: 'Annual Physical Examination',
-      amount: 300,
-      insuranceCoverage: 240,
-      patientResponsibility: 60,
-      status: 'pending',
-      dueDate: '2024-02-16',
-      createdAt: '2024-01-16T14:30:00Z'
+  const handleSearch = (query: string) => {
+    setSearchQuery(query)
+    if (query.trim()) {
+      setSearchedPatientId(query.trim())
+    } else {
+      setSearchedPatientId('')
     }
-  ]
-
-  const mockInsurance = [
-    {
-      id: '1',
-      patientId: '1',
-      provider: 'Blue Cross Blue Shield',
-      policyNumber: 'BC123456789',
-      groupNumber: 'GRP001',
-      subscriberName: 'John Doe',
-      relationship: 'Self',
-      effectiveDate: '2024-01-01',
-      expirationDate: '2024-12-31',
-      copay: 20,
-      deductible: 1000,
-      isActive: true
-    }
-  ]
-
-  const handleAddRecord = () => {
-    setIsModalOpen(true)
   }
 
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'paid':
+    switch (status.toLowerCase()) {
+      case 'active':
         return 'bg-green-100 text-green-800'
+      case 'inactive':
+        return 'bg-red-100 text-red-800'
       case 'pending':
         return 'bg-yellow-100 text-yellow-800'
-      case 'overdue':
-        return 'bg-red-100 text-red-800'
-      case 'disputed':
-        return 'bg-orange-100 text-orange-800'
+      case 'cancelled':
+        return 'bg-gray-100 text-gray-800'
       default:
-        return 'bg-gray-100 text-black'
-    }
-  }
-
-  const tabs = [
-    { id: 'billing', label: 'Billing Records', icon: CreditCard },
-    { id: 'insurance', label: 'Insurance', icon: Shield },
-    { id: 'reports', label: 'Reports', icon: FileText }
-  ]
-
-  const getCurrentData = () => {
-    switch (activeTab) {
-      case 'billing':
-        return mockBillingRecords
-      case 'insurance':
-        return mockInsurance
-      default:
-        return []
-    }
-  }
-
-  const getFormComponent = () => {
-    switch (activeTab) {
-      case 'billing':
-        return <BillingForm onSubmit={() => {}} onCancel={() => setIsModalOpen(false)} />
-      case 'insurance':
-        return <InsuranceForm onSubmit={() => {}} onCancel={() => setIsModalOpen(false)} />
-      default:
-        return null
-    }
-  }
-
-  const getModalTitle = () => {
-    switch (activeTab) {
-      case 'billing':
-        return 'Add Billing Record'
-      case 'insurance':
-        return 'Add Insurance Information'
-      default:
-        return 'Add Record'
+        return 'bg-gray-100 text-gray-800'
     }
   }
 
@@ -127,239 +49,144 @@ export default function BillingPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-black">Billing & Insurance</h1>
-            <p className="text-black mt-2">Manage billing records, insurance, and financial reports</p>
+            <p className="text-black mt-2">Search patient billing and insurance information</p>
           </div>
-          {activeTab !== 'reports' && (
-            <Button onClick={handleAddRecord}>
-              <DollarSign className="h-4 w-4 mr-2" />
-              Add {activeTab === 'billing' ? 'Billing Record' : 'Insurance'}
-            </Button>
-          )}
         </div>
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-black">Total Revenue</p>
-                  <p className="text-2xl font-bold text-black">$45,230</p>
-                </div>
-                <DollarSign className="h-8 w-8 text-green-600" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-black">Pending Payments</p>
-                  <p className="text-2xl font-bold text-black">$12,450</p>
-                </div>
-                <CreditCard className="h-8 w-8 text-yellow-600" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-black">Insurance Claims</p>
-                  <p className="text-2xl font-bold text-black">89</p>
-                </div>
-                <Shield className="h-8 w-8 text-blue-600" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-black">Overdue Accounts</p>
-                  <p className="text-2xl font-bold text-black">$3,200</p>
-                </div>
-                <FileText className="h-8 w-8 text-red-600" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Search Box */}
+        <Card>
+          <CardContent className="pt-6">
+            <div className="max-w-md">
+              <SearchBox
+                placeholder="Search by patient ID..."
+                onSearch={handleSearch}
+                debounceMs={500}
+              />
+              {searchQuery && (
+                <p className="text-sm text-gray-600 mt-2">
+                  {accountLoading || coverageLoading ? 'Searching...' : 
+                   accountError || coverageError ? 'Error loading patient information' : 
+                   accountInfo || coverageInfo.length > 0 ? `Found information for patient ${searchQuery}` :
+                   'No billing information found for this patient'}
+                </p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
-        {/* Tabs */}
-        <div className="border-b border-gray-200">
-          <nav className="-mb-px flex space-x-8">
-            {tabs.map((tab) => {
-              const Icon = tab.icon
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
-                  className={`flex items-center py-2 px-1 border-b-2 font-medium text-sm ${
-                    activeTab === tab.id
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-black hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  <Icon className="h-5 w-5 mr-2" />
-                  {tab.label}
-                </button>
-              )
-            })}
-          </nav>
-        </div>
-
-        {/* Content */}
-        {activeTab === 'reports' ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Monthly Revenue Report</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                    <span>January 2024</span>
-                    <span className="font-semibold">$45,230</span>
-                  </div>
-                  <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                    <span>December 2023</span>
-                    <span className="font-semibold">$42,180</span>
-                  </div>
-                  <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                    <span>November 2023</span>
-                    <span className="font-semibold">$38,950</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Insurance Coverage Analysis</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                    <span>Blue Cross Blue Shield</span>
-                    <span className="font-semibold">45%</span>
-                  </div>
-                  <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                    <span>Aetna</span>
-                    <span className="font-semibold">30%</span>
-                  </div>
-                  <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                    <span>Other</span>
-                    <span className="font-semibold">25%</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        ) : (
+        {/* Account Information */}
+        {accountInfo && (
           <Card>
             <CardHeader>
-              <CardTitle className="capitalize">{activeTab} Records</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <CreditCardIcon className="h-5 w-5" />
+                Account Information
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              {getCurrentData().length === 0 ? (
-                <div className="text-center py-12">
-                  <p className="text-black mb-4">No {activeTab} records found</p>
-                  <Button onClick={handleAddRecord}>
-                    <DollarSign className="h-4 w-4 mr-2" />
-                    Add First {activeTab === 'billing' ? 'Billing Record' : 'Insurance'}
-                  </Button>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-gray-600">Patient Name</p>
+                  <p className="text-lg font-semibold text-black">{accountInfo.patientName}</p>
                 </div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Patient</TableHead>
-                      <TableHead>Date</TableHead>
-                      {activeTab === 'billing' && (
-                        <>
-                          <TableHead>Service</TableHead>
-                          <TableHead>Amount</TableHead>
-                          <TableHead>Insurance</TableHead>
-                          <TableHead>Patient Due</TableHead>
-                          <TableHead>Status</TableHead>
-                        </>
-                      )}
-                      {activeTab === 'insurance' && (
-                        <>
-                          <TableHead>Provider</TableHead>
-                          <TableHead>Policy Number</TableHead>
-                          <TableHead>Copay</TableHead>
-                          <TableHead>Deductible</TableHead>
-                          <TableHead>Status</TableHead>
-                        </>
-                      )}
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {getCurrentData().map((record: any) => (
-                      <TableRow key={record.id}>
-                        <TableCell className="font-medium">{record.patientName}</TableCell>
-                        <TableCell>{formatDate(record.serviceDate || record.effectiveDate)}</TableCell>
-                        
-                        {activeTab === 'billing' && (
-                          <>
-                            <TableCell>{record.service}</TableCell>
-                            <TableCell>${record.amount}</TableCell>
-                            <TableCell>${record.insuranceCoverage}</TableCell>
-                            <TableCell>${record.patientResponsibility}</TableCell>
-                            <TableCell>
-                              <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(record.status)}`}>
-                                {record.status}
-                              </span>
-                            </TableCell>
-                          </>
-                        )}
-                        
-                        {activeTab === 'insurance' && (
-                          <>
-                            <TableCell>{record.provider}</TableCell>
-                            <TableCell>{record.policyNumber}</TableCell>
-                            <TableCell>${record.copay}</TableCell>
-                            <TableCell>${record.deductible}</TableCell>
-                            <TableCell>
-                              <span className={`px-2 py-1 text-xs rounded-full ${
-                                record.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-black'
-                              }`}>
-                                {record.isActive ? 'Active' : 'Inactive'}
-                              </span>
-                            </TableCell>
-                          </>
-                        )}
-                        
-                        <TableCell>
-                          <div className="flex items-center space-x-2">
-                            <Button variant="ghost" size="sm">
-                              Edit
-                            </Button>
-                            <Button variant="ghost" size="sm">
-                              Delete
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-gray-600">Outstanding Balance</p>
+                  <p className="text-lg font-semibold text-red-600">${accountInfo.outstandingBalance.toFixed(2)}</p>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-gray-600">Unused Funds</p>
+                  <p className="text-lg font-semibold text-green-600">${accountInfo.unusedFunds.toFixed(2)}</p>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-gray-600">Status</p>
+                  <span className={`px-3 py-1 text-sm rounded-full ${getStatusColor(accountInfo.status)}`}>
+                    {accountInfo.status}
+                  </span>
+                </div>
+              </div>
+              {accountInfo.description && (
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <p className="text-sm font-medium text-gray-600 mb-2">Description</p>
+                  <p className="text-sm text-gray-800">{accountInfo.description}</p>
+                </div>
               )}
             </CardContent>
           </Card>
         )}
 
-        {/* Form Modal */}
-        <Modal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          title={getModalTitle()}
-          size="lg"
-        >
-          {getFormComponent()}
-        </Modal>
+        {/* Coverage Information */}
+        {coverageInfo.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <ShieldIcon className="h-5 w-5" />
+                Insurance Coverage
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Payor</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Class</TableHead>
+                    <TableHead>Subscriber ID</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Cost to Beneficiary</TableHead>
+                    <TableHead>Period</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {coverageInfo.map((coverage) => (
+                    <TableRow key={coverage.id}>
+                      <TableCell className="font-medium">{coverage.payor}</TableCell>
+                      <TableCell>{coverage.type}</TableCell>
+                      <TableCell>{coverage.class}</TableCell>
+                      <TableCell>{coverage.subscriberId}</TableCell>
+                      <TableCell>
+                        <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(coverage.status)}`}>
+                          {coverage.status}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        {coverage.costToBeneficiary ? (
+                          <span>
+                            {coverage.costToBeneficiary.type}: ${coverage.costToBeneficiary.value.toFixed(2)} {coverage.costToBeneficiary.currency}
+                          </span>
+                        ) : (
+                          <span className="text-gray-500">N/A</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {coverage.period ? (
+                          <div className="text-sm">
+                            <div>Start: {formatDate(coverage.period.start)}</div>
+                            <div>End: {formatDate(coverage.period.end)}</div>
+                          </div>
+                        ) : (
+                          <span className="text-gray-500">N/A</span>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* No Results */}
+        {searchQuery && !accountLoading && !coverageLoading && !accountInfo && coverageInfo.length === 0 && (
+          <Card>
+            <CardContent className="text-center py-12">
+              <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No Information Found</h3>
+              <p className="text-gray-600">
+                No billing or insurance information found for patient ID: <span className="font-medium">{searchQuery}</span>
+              </p>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </DashboardLayout>
   )

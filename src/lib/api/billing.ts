@@ -1,101 +1,140 @@
-import { BillingRecord, Insurance } from '@/types'
+import axios from 'axios'
+import { getPatient } from './patients'
 
-// Mock data for development
-const mockBillingRecords: BillingRecord[] = [
-  {
-    id: '1',
-    patientId: '1',
-    patientName: 'John Doe',
-    serviceDate: '2024-01-15',
-    service: 'Office Visit - Consultation',
-    amount: 200,
-    insuranceCoverage: 160,
-    patientResponsibility: 40,
-    status: 'paid',
-    dueDate: '2024-02-15',
-    createdAt: '2024-01-15T10:00:00Z'
-  },
-  {
-    id: '2',
-    patientId: '2',
-    patientName: 'Sarah Smith',
-    serviceDate: '2024-01-16',
-    service: 'Annual Physical Examination',
-    amount: 300,
-    insuranceCoverage: 240,
-    patientResponsibility: 60,
-    status: 'pending',
-    dueDate: '2024-02-16',
-    createdAt: '2024-01-16T14:30:00Z'
-  }
-]
-
-const mockInsurance: Insurance[] = [
-  {
-    id: '1',
-    patientId: '1',
-    provider: 'Blue Cross Blue Shield',
-    policyNumber: 'BC123456789',
-    groupNumber: 'GRP001',
-    subscriberName: 'John Doe',
-    relationship: 'Self',
-    effectiveDate: '2024-01-01',
-    expirationDate: '2024-12-31',
-    copay: 20,
-    deductible: 1000,
-    isActive: true
-  }
-]
-
-export async function getBillingRecords(patientId?: string): Promise<BillingRecord[]> {
-  await new Promise(resolve => setTimeout(resolve, 500))
-  return patientId 
-    ? mockBillingRecords.filter(record => record.patientId === patientId)
-    : mockBillingRecords
+export interface AccountInfo {
+  id: string
+  patientId: string
+  patientName: string
+  outstandingBalance: number
+  unusedFunds: number
+  status: string
+  description?: string
 }
 
-export async function createBillingRecord(record: Omit<BillingRecord, 'id' | 'createdAt'>): Promise<BillingRecord> {
-  await new Promise(resolve => setTimeout(resolve, 800))
-  
-  const newRecord: BillingRecord = {
-    ...record,
-    id: Date.now().toString(),
-    createdAt: new Date().toISOString()
+export interface CoverageInfo {
+  id: string
+  patientId: string
+  subscriberId: string
+  payor: string
+  class: string
+  type: string
+  status: string
+  network?: string
+  costToBeneficiary?: {
+    type: string
+    value: number
+    currency: string
   }
-  
-  mockBillingRecords.push(newRecord)
-  return newRecord
+  period?: {
+    start: string
+    end: string
+  }
 }
 
-export async function updateBillingRecord(id: string, updates: Partial<BillingRecord>): Promise<BillingRecord | null> {
-  await new Promise(resolve => setTimeout(resolve, 600))
-  
-  const index = mockBillingRecords.findIndex(record => record.id === id)
-  if (index === -1) return null
-  
-  mockBillingRecords[index] = {
-    ...mockBillingRecords[index],
-    ...updates
+export async function getAccountInfo(patientId: string): Promise<AccountInfo | null> {
+  try {
+    const response = await axios.get(`/api/account?patient=${patientId}`)
+    
+    console.log('Account API Response:', JSON.stringify(response.data, null, 2))
+    
+    // Handle FHIR Bundle response format
+    if (response.data && response.data.entry && Array.isArray(response.data.entry) && response.data.entry.length > 0) {
+      const resource = response.data.entry[0].resource
+      
+      console.log('Account Resource:', JSON.stringify(resource, null, 2))
+      
+      // Extract outstanding balance from array
+      const outstandingBalance = resource.outstandingBalance?.[0]?.value || 0
+      
+      // Extract unused funds from array
+      const unusedFunds = resource.unusedFunds?.[0]?.value || 0
+      
+      // Get patient ID from subject reference
+      const patientIdFromResource = resource.subject?.[0]?.reference?.split('/').pop() || patientId
+      
+      // Fetch patient details to get the actual patient name
+      let patientName = `Patient ${patientIdFromResource}`
+      try {
+        const patient = await getPatient(patientIdFromResource)
+        if (patient && (patient.given || patient.family)) {
+          patientName = `${patient.given || ''} ${patient.family || ''}`.trim()
+        }
+        console.log('Patient details fetched:', patient)
+      } catch (patientError) {
+        console.warn('Could not fetch patient details:', patientError)
+        // Continue with default patient name
+      }
+      
+      const accountInfo = {
+        id: resource.id,
+        patientId: patientIdFromResource,
+        patientName: patientName,
+        outstandingBalance: outstandingBalance,
+        unusedFunds: unusedFunds,
+        status: resource.status || 'active',
+        description: resource.businessUnitName?.[0] || undefined
+      }
+      
+      console.log('Parsed Account Info:', accountInfo)
+      
+      return accountInfo
+    }
+    
+    return null
+  } catch (error) {
+    console.error('Error fetching account info:', error)
+    return null
   }
-  
-  return mockBillingRecords[index]
 }
 
-export async function getInsurance(patientId?: string): Promise<Insurance[]> {
-  await new Promise(resolve => setTimeout(resolve, 500))
-  return patientId 
-    ? mockInsurance.filter(insurance => insurance.patientId === patientId)
-    : mockInsurance
-}
-
-export async function createInsurance(insurance: Omit<Insurance, 'id'>): Promise<Insurance> {
-  await new Promise(resolve => setTimeout(resolve, 800))
-  
-  const newInsurance: Insurance = {
-    ...insurance,
-    id: Date.now().toString()
+export async function getCoverageInfo(patientId: string): Promise<CoverageInfo[]> {
+  try {
+    const response = await axios.get(`/api/coverage?patient=${patientId}`)
+    
+    console.log('Coverage API Response:', JSON.stringify(response.data, null, 2))
+    
+    // Handle FHIR Bundle response format
+    if (response.data && response.data.entry && Array.isArray(response.data.entry)) {
+      return response.data.entry.map((entry: any) => {
+        const resource = entry.resource
+        
+        console.log('Coverage Resource:', JSON.stringify(resource, null, 2))
+        
+        // Extract plan and group values from class array
+        const planClass = resource.class?.find((cls: any) => cls.type?.coding?.[0]?.code === 'plan')
+        const groupClass = resource.class?.find((cls: any) => cls.type?.coding?.[0]?.code === 'group')
+        
+        const planValue = planClass?.value || ''
+        const groupValue = groupClass?.value || ''
+        
+        // Get relationship information
+        const relationship = resource.relationship?.coding?.[0]?.display || resource.relationship?.text || 'Unknown'
+        
+        // Get policy holder name
+        const policyHolder = resource.policyHolder?.display || 'Unknown'
+        
+        const coverageInfo = {
+          id: resource.id,
+          patientId: resource.beneficiary?.reference?.split('/').pop() || patientId,
+          subscriberId: planValue, // Using plan value as subscriber ID
+          payor: policyHolder, // Using policy holder as payor
+          class: groupValue, // Using group value as class
+          type: relationship, // Using relationship as type
+          status: resource.status || 'unknown',
+          network: undefined, // Not available in this response
+          costToBeneficiary: undefined, // Not available in this response
+          period: undefined // Not available in this response
+        }
+        
+        console.log('Parsed Coverage Info:', coverageInfo)
+        
+        return coverageInfo
+      })
+    }
+    
+    return []
+  } catch (error) {
+    console.error('Error fetching coverage info:', error)
+    return []
   }
-  
-  mockInsurance.push(newInsurance)
-  return newInsurance
 }
