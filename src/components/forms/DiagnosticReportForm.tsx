@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/Input'
 
 const diagnosticReportSchema = z.object({
   code: z.string().min(1, 'Report type is required'),
-  status: z.enum(['registered', 'partial', 'preliminary', 'final', 'amended', 'corrected', 'appended', 'cancelled', 'entered-in-error', 'unknown']).default('final'),
+  status: z.enum(['registered', 'partial', 'preliminary', 'final', 'amended', 'corrected', 'appended', 'cancelled', 'entered-in-error', 'unknown']),
   category: z.string().min(1, 'Category is required'),
   effectiveDate: z.string().optional(),
   performer: z.string().optional(),
@@ -25,7 +25,7 @@ interface DiagnosticReportFormProps {
   isLoading?: boolean
 }
 
-function DiagnosticReportForm({ patientId, onSubmit, onCancel, isLoading }: DiagnosticReportFormProps) {
+function DiagnosticReportForm({ onSubmit, onCancel, isLoading }: DiagnosticReportFormProps) {
   const {
     register,
     handleSubmit,

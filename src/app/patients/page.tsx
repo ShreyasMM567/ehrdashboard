@@ -27,7 +27,7 @@ export default function PatientsPage() {
     count: pageSize 
   })
   
-  const { create, update, remove } = usePatientMutations()
+  const { create, update } = usePatientMutations()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null)
   const [isEditing, setIsEditing] = useState(false)

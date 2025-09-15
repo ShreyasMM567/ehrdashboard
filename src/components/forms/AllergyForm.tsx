@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/Input'
 const allergySchema = z.object({
   code: z.string().min(1, 'Allergen name is required'),
   description: z.string().min(1, 'Reaction description is required'),
-  clinicalStatus: z.enum(['active', 'inactive', 'resolved']).default('active')
+  clinicalStatus: z.enum(['active', 'inactive', 'resolved'])
 })
 
 type AllergyFormData = z.infer<typeof allergySchema>
@@ -22,7 +22,7 @@ interface AllergyFormProps {
   isLoading?: boolean
 }
 
-function AllergyForm({ patientId, onSubmit, onCancel, isLoading }: AllergyFormProps) {
+function AllergyForm({ onSubmit, onCancel, isLoading }: AllergyFormProps) {
   const {
     register,
     handleSubmit,

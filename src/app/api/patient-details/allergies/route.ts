@@ -3,7 +3,7 @@ import axios from 'axios'
 import { createAuthenticatedHandler } from '@/lib/auth-middleware'
 import { getApiCredentialsFromRequest } from '@/lib/utils'
 
-export const GET = createAuthenticatedHandler(async (request: NextRequest, token) => {
+export const GET = createAuthenticatedHandler(async (request: NextRequest, _token) => {
   try {
     const { searchParams } = new URL(request.url)
     const patientId = searchParams.get('patientId')
@@ -41,7 +41,7 @@ export const GET = createAuthenticatedHandler(async (request: NextRequest, token
   }
 })
 
-export const POST = createAuthenticatedHandler(async (request: NextRequest, token) => {
+export const POST = createAuthenticatedHandler(async (request: NextRequest, _token) => {
   try {
     const body = await request.json()
     const { patientId, code, description, clinicalStatus } = body

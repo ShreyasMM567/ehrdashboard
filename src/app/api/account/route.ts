@@ -7,7 +7,7 @@ const API_BASE_URL = process.env.API_BASE_URL
 const API_URL_PREFIX = process.env.API_URL_PREFIX
 
 // GET /api/account?patient={patientId}
-export const GET = createAuthenticatedHandler(async (request: NextRequest, token) => {
+export const GET = createAuthenticatedHandler(async (request: NextRequest, _token) => {
   try {
     const { searchParams } = new URL(request.url)
     const patientId = searchParams.get('patient')

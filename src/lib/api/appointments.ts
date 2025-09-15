@@ -12,16 +12,18 @@ export async function getAppointments(): Promise<Appointment[]> {
     }
     
     // Transform FHIR Appointment resources to our Appointment interface
-    const appointments: Appointment[] = bundle.entry.map((entry: any) => {
-      const resource = entry.resource
+    const appointments: Appointment[] = bundle.entry.map((entry: unknown) => {
+      const entryObj = entry as any
+      const resource = entryObj.resource
       
       // Extract patient information
       let patientId = ''
       let patientName = ''
       if (resource.participant) {
-        const patientParticipant = resource.participant.find((p: any) => 
-          p.actor?.reference?.includes('/Patient/')
-        )
+        const patientParticipant = resource.participant.find((p: unknown) => {
+          const pObj = p as any
+          return pObj.actor?.reference?.includes('/Patient/')
+        })
         if (patientParticipant?.actor?.reference) {
           // Extract ID from full URL like "https://stage.ema-api.com/.../Patient/256708"
           const patientMatch = patientParticipant.actor.reference.match(/\/Patient\/(\d+)/)

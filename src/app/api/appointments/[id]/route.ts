@@ -10,7 +10,7 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  return createAuthenticatedHandler(async (req: NextRequest, token) => {
+  return createAuthenticatedHandler(async (_req: NextRequest, _token) => {
   try {
     const { id } = await params
     
@@ -36,10 +36,12 @@ export async function GET(
     
     return NextResponse.json(response.data)
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching appointment:', error)
     
-    if (error.response?.status === 404) {
+    if (error && typeof error === 'object' && 'response' in error && 
+        error.response && typeof error.response === 'object' && 'status' in error.response && 
+        error.response.status === 404) {
       return NextResponse.json({ error: 'Appointment not found' }, { status: 404 })
     }
     
@@ -55,7 +57,7 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  return createAuthenticatedHandler(async (req: NextRequest, token) => {
+  return createAuthenticatedHandler(async (_req: NextRequest, _token) => {
   try {
     const { id } = await params
     const body = await request.json()
@@ -87,15 +89,16 @@ export async function PUT(
     console.log('PUT response:', response.data)
     return NextResponse.json(response.data)
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error updating appointment:', error)
-    console.error('Error response:', error.response?.data)
-    console.error('Error status:', error.response?.status)
+    const errorObj = error as any
+    console.error('Error response:', errorObj.response?.data)
+    console.error('Error status:', errorObj.response?.status)
     
     return NextResponse.json({ 
       error: 'Failed to update appointment',
-      details: error.response?.data
-    }, { status: error.response?.status || 500 })
+      details: errorObj.response?.data
+    }, { status: errorObj.response?.status || 500 })
   }
   })(request)
 }

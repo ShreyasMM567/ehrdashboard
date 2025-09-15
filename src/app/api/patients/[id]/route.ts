@@ -11,7 +11,7 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  return createAuthenticatedHandler(async (req: NextRequest, token) => {
+  return createAuthenticatedHandler(async (_req: NextRequest, _token) => {
   try {
     const { apiKey, accessToken } = getApiCredentialsFromRequest(request)
     const { id } = await params
@@ -39,7 +39,7 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  return createAuthenticatedHandler(async (req: NextRequest, token) => {
+  return createAuthenticatedHandler(async (_req: NextRequest, _token) => {
   try {
     const { apiKey, accessToken } = getApiCredentialsFromRequest(request)
     const { id } = await params
@@ -61,14 +61,15 @@ export async function PUT(
     
     console.log('PUT response:', response.data)
     return NextResponse.json(response.data)
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error updating patient:', error)
-    console.error('Error response:', error.response?.data)
-    console.error('Error status:', error.response?.status)
+    const errorObj = error as any
+    console.error('Error response:', errorObj.response?.data)
+    console.error('Error status:', errorObj.response?.status)
     return NextResponse.json({ 
       error: 'Failed to update patient',
-      details: error.response?.data
-    }, { status: error.response?.status || 500 })
+      details: errorObj.response?.data
+    }, { status: errorObj.response?.status || 500 })
   }
   })(request)
 }
@@ -78,7 +79,7 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  return createAuthenticatedHandler(async (req: NextRequest, token) => {
+  return createAuthenticatedHandler(async (_req: NextRequest, _token) => {
   try {
     const { apiKey, accessToken } = getApiCredentialsFromRequest(request)
     const { id } = await params

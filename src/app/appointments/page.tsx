@@ -9,7 +9,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Plus, Calendar, Clock, User, MapPin, Loader2, Edit, MoreHorizontal } from 'lucide-react'
 import { getAppointments, getAppointment, createAppointment, updateAppointment } from '@/lib/api/appointments'
 import { Appointment } from '@/types'
-import { formatDate } from '@/lib/utils'
 import SearchBox from '@/components/ui/SearchBox'
 import { AppointmentDetailModal } from '@/components/modals/AppointmentDetailModal'
 import { Modal } from '@/components/ui/Modal'
@@ -121,9 +120,10 @@ export default function AppointmentsPage() {
       // Refresh the appointments list
       await fetchAppointments()
       setIsBookingModalOpen(false)
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error creating appointment:', error)
-      setBookingError(error.message || 'Failed to create appointment')
+      const errorObj = error as any
+      setBookingError(errorObj.message || 'Failed to create appointment')
     } finally {
       setIsCreatingAppointment(false)
     }
@@ -145,9 +145,10 @@ export default function AppointmentsPage() {
       // Refresh the appointments list
       await fetchAppointments()
       setIsEditModalOpen(false)
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error updating appointment:', error)
-      setEditError(error.message || 'Failed to update appointment')
+      const errorObj = error as any
+      setEditError(errorObj.message || 'Failed to update appointment')
     } finally {
       setIsUpdatingAppointment(false)
     }
@@ -326,7 +327,7 @@ export default function AppointmentsPage() {
               return (
                 <div className="text-center py-8">
                   <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-black">No appointment found with ID "{searchQuery}"</p>
+                  <p className="text-black">No appointment found with ID &quot;{searchQuery}&quot;</p>
                   <p className="text-black text-sm mt-1">Try searching with a different appointment ID</p>
                 </div>
               )

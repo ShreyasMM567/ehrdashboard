@@ -51,7 +51,7 @@ export function EditSuccessPopup({
               Patient Updated Successfully!
             </p>
             <p className="text-sm text-black mt-1">
-              Successfully edited <span className="font-semibold">"{formatFields(updatedFields)}"</span> for patient <span className="font-semibold">"{patientName}"</span> with ID <span className="font-mono text-blue-600">"{patientId}"</span>
+              Successfully edited <span className="font-semibold">&quot;{formatFields(updatedFields)}&quot;</span> for patient <span className="font-semibold">&quot;{patientName}&quot;</span> with ID <span className="font-mono text-blue-600">&quot;{patientId}&quot;</span>
             </p>
           </div>
           <button

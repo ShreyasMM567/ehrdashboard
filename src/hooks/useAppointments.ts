@@ -1,5 +1,5 @@
 import useSWR from 'swr'
-import { getAppointments, getAppointment, createAppointment, updateAppointment, deleteAppointment } from '@/lib/api/appointments'
+import { getAppointments, getAppointment, createAppointment, updateAppointment } from '@/lib/api/appointments'
 import { Appointment } from '@/types'
 
 export function useAppointments() {
@@ -31,7 +31,14 @@ export function useAppointmentMutations() {
   const { mutate } = useSWR('appointments')
   
   const create = async (appointment: Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'>) => {
-    const newAppointment = await createAppointment(appointment)
+    const appointmentData = {
+      patientId: appointment.patientId || '',
+      practitionerId: appointment.practitionerId || '',
+      startDateTime: appointment.start,
+      endDateTime: appointment.end,
+      minutesDuration: appointment.minutesDuration
+    }
+    const newAppointment = await createAppointment(appointmentData)
     mutate()
     return newAppointment
   }
@@ -43,14 +50,5 @@ export function useAppointmentMutations() {
     return updatedAppointment
   }
   
-  const remove = async (id: string) => {
-    const success = await deleteAppointment(id)
-    if (success) {
-      mutate()
-      mutate(`appointment-${id}`, null, false)
-    }
-    return success
-  }
-  
-  return { create, update, remove }
+  return { create, update }
 }

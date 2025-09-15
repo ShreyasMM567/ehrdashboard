@@ -3,7 +3,7 @@ import { getToken } from "next-auth/jwt"
 
 export async function withAuth(
   request: NextRequest,
-  handler: (request: NextRequest, token: any) => Promise<NextResponse>
+  handler: (request: NextRequest, token: unknown) => Promise<NextResponse>
 ) {
   try {
     const token = await getToken({ 
@@ -39,7 +39,7 @@ export async function withAuth(
 }
 
 export function createAuthenticatedHandler(
-  handler: (request: NextRequest, token: any) => Promise<NextResponse>
+  handler: (request: NextRequest, token: unknown) => Promise<NextResponse>
 ) {
   return async (request: NextRequest) => {
     return withAuth(request, handler)

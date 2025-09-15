@@ -6,7 +6,7 @@ import { getApiCredentialsFromRequest } from '@/lib/utils'
 const API_BASE_URL = process.env.API_BASE_URL
 const API_URL_PREFIX = process.env.API_URL_PREFIX
 
-export const GET = createAuthenticatedHandler(async (request: NextRequest, token) => {
+export const GET = createAuthenticatedHandler(async (request: NextRequest, _token) => {
   try {
     const { apiKey, accessToken } = getApiCredentialsFromRequest(request)
     
@@ -26,11 +26,13 @@ export const GET = createAuthenticatedHandler(async (request: NextRequest, token
     
     return NextResponse.json(response.data)
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching appointments:', error)
     
     // Handle 404 errors gracefully
-    if (error.response?.status === 404) {
+    if (error && typeof error === 'object' && 'response' in error && 
+        error.response && typeof error.response === 'object' && 'status' in error.response && 
+        error.response.status === 404) {
       return NextResponse.json({
         resourceType: "Bundle",
         type: "searchset",
@@ -46,7 +48,7 @@ export const GET = createAuthenticatedHandler(async (request: NextRequest, token
   }
 })
 
-export const POST = createAuthenticatedHandler(async (request: NextRequest, token) => {
+export const POST = createAuthenticatedHandler(async (request: NextRequest, _token) => {
   try {
     const { apiKey, accessToken } = getApiCredentialsFromRequest(request)
     const body = await request.json()
@@ -139,12 +141,14 @@ export const POST = createAuthenticatedHandler(async (request: NextRequest, toke
       
       return NextResponse.json(response.data)
       
-    } catch (validationError: any) {
+    } catch (validationError: unknown) {
       console.error('Error validating patient or practitioner:', validationError)
       
       // Handle specific validation errors
-      if (validationError.response?.status === 404) {
-        const errorMessage = validationError.config?.url?.includes('/Patient/') 
+      if (validationError && typeof validationError === 'object' && 'response' in validationError && 
+          validationError.response && typeof validationError.response === 'object' && 'status' in validationError.response && 
+          validationError.response.status === 404) {
+        const errorMessage = (validationError as any).config?.url?.includes('/Patient/') 
           ? 'Patient not found' 
           : 'Practitioner not found'
         return NextResponse.json({ error: errorMessage }, { status: 404 })
@@ -156,12 +160,16 @@ export const POST = createAuthenticatedHandler(async (request: NextRequest, toke
       )
     }
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error creating appointment:', error)
     
     // Handle specific booking unavailable error
-    if (error.response?.data?.error === 'BOOKING_UNAVAILABLE' || 
-        error.response?.data?.message?.includes('BOOKING_UNAVAILABLE')) {
+    if (error && typeof error === 'object' && 'response' in error && 
+        error.response && typeof error.response === 'object' && 'data' in error.response &&
+        error.response.data && typeof error.response.data === 'object' &&
+        ('error' in error.response.data && error.response.data.error === 'BOOKING_UNAVAILABLE' ||
+         'message' in error.response.data && typeof error.response.data.message === 'string' && 
+         error.response.data.message.includes('BOOKING_UNAVAILABLE'))) {
       return NextResponse.json(
         { error: 'BOOKING_UNAVAILABLE' },
         { status: 409 }

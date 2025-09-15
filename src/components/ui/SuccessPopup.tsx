@@ -42,7 +42,7 @@ export function SuccessPopup({
               Patient Created Successfully!
             </p>
             <p className="text-sm text-black mt-1">
-              Created patient <span className="font-semibold">"{patientName}"</span> with ID <span className="font-mono text-blue-600">"{patientId}"</span>
+              Created patient <span className="font-semibold">&quot;{patientName}&quot;</span> with ID <span className="font-mono text-blue-600">&quot;{patientId}&quot;</span>
             </p>
           </div>
           <button

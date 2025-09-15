@@ -34,8 +34,9 @@ export async function getPatients(params?: PaginationParams): Promise<PaginatedR
     // Handle FHIR Bundle response format
     if (response.data && response.data.entry && Array.isArray(response.data.entry)) {
       console.log('Processing FHIR Bundle with', response.data.entry.length, 'entries')
-      patients = response.data.entry.map((entry: any) => {
-        const resource = entry.resource
+      patients = response.data.entry.map((entry: unknown) => {
+        const entryObj = entry as any
+        const resource = entryObj.resource
         console.log('Processing patient resource:', resource.id)
         return {
           id: resource.id,
@@ -58,14 +59,17 @@ export async function getPatients(params?: PaginationParams): Promise<PaginatedR
       total = response.data.total || patients.length
     } else if (Array.isArray(response.data)) {
       console.log('Response is already an array with', response.data.length, 'items')
-      patients = response.data.map((patient: any) => ({
-        id: patient.id,
-        family: patient.family || '',
-        given: patient.given || '',
-        birthDate: patient.birthDate || '',
-        email: patient.email || '',
-        phone: patient.phone || ''
-      }))
+      patients = response.data.map((patient: unknown) => {
+        const patientObj = patient as any
+        return {
+        id: patientObj.id,
+        family: patientObj.family || '',
+        given: patientObj.given || '',
+        birthDate: patientObj.birthDate || '',
+        email: patientObj.email || '',
+        phone: patientObj.phone || ''
+      }
+      })
       total = patients.length
     } else {
       console.log('Unexpected response format:', response.data)

@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/Input'
 
 const medicationSchema = z.object({
   medicationCodeableConcept: z.string().min(1, 'Medication name is required'),
-  status: z.enum(['active', 'completed', 'entered-in-error', 'intended', 'stopped', 'on-hold', 'unknown', 'not-taken']).default('active'),
+  status: z.enum(['active', 'completed', 'entered-in-error', 'intended', 'stopped', 'on-hold', 'unknown', 'not-taken']),
   effectiveDateTime: z.string().optional(),
   dosage: z.string().optional(),
   note: z.string().optional()
@@ -24,7 +24,7 @@ interface MedicationFormProps {
   isLoading?: boolean
 }
 
-function MedicationForm({ patientId, onSubmit, onCancel, isLoading }: MedicationFormProps) {
+function MedicationForm({ onSubmit, onCancel, isLoading }: MedicationFormProps) {
   const {
     register,
     handleSubmit,

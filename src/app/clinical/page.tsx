@@ -16,16 +16,7 @@ import { formatDate } from '@/lib/utils'
 export default function ClinicalPage() {
   const [activeTab, setActiveTab] = useState<'vitals' | 'allergies' | 'medications'>('vitals')
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [selectedPatient, setSelectedPatient] = useState<string>('')
-
-  // Placeholder patient data for display
-  const placeholderPatients = [
-    { id: '1', name: 'John Doe', dateOfBirth: '1985-03-15', gender: 'Male' },
-    { id: '2', name: 'Jane Smith', dateOfBirth: '1990-07-22', gender: 'Female' },
-    { id: '3', name: 'Michael Johnson', dateOfBirth: '1978-11-08', gender: 'Male' },
-    { id: '4', name: 'Sarah Wilson', dateOfBirth: '1992-05-14', gender: 'Female' },
-    { id: '5', name: 'David Brown', dateOfBirth: '1988-09-30', gender: 'Male' }
-  ]
+  const [selectedPatient] = useState<string>('')
 
   // Mock data for clinical records
   const mockVitals = [
@@ -222,7 +213,7 @@ export default function ClinicalPage() {
               return (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
+                  onClick={() => setActiveTab(tab.id as "vitals" | "allergies" | "medications")}
                   className={`flex items-center py-2 px-1 border-b-2 font-medium text-sm ${
                     activeTab === tab.id
                       ? 'border-blue-500 text-blue-600'
@@ -284,46 +275,48 @@ export default function ClinicalPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {getCurrentData().map((record: any) => (
-                    <TableRow key={record.id}>
-                      <TableCell className="font-medium">{record.patientName}</TableCell>
-                      <TableCell>{formatDate(record.date || record.startDate || record.createdAt)}</TableCell>
+                  {getCurrentData().map((record: unknown) => {
+                    const recordObj = record as any
+                    return (
+                    <TableRow key={recordObj.id}>
+                      <TableCell className="font-medium">{recordObj.patientName}</TableCell>
+                      <TableCell>{formatDate(recordObj.date || recordObj.startDate || recordObj.createdAt)}</TableCell>
                       
                       {activeTab === 'vitals' && (
                         <>
-                          <TableCell>{record.bloodPressure.systolic}/{record.bloodPressure.diastolic}</TableCell>
-                          <TableCell>{record.heartRate} bpm</TableCell>
-                          <TableCell>{record.temperature}°F</TableCell>
-                          <TableCell>{record.weight} lbs</TableCell>
+                          <TableCell>{recordObj.bloodPressure.systolic}/{recordObj.bloodPressure.diastolic}</TableCell>
+                          <TableCell>{recordObj.heartRate} bpm</TableCell>
+                          <TableCell>{recordObj.temperature}°F</TableCell>
+                          <TableCell>{recordObj.weight} lbs</TableCell>
                         </>
                       )}
                       
                       {activeTab === 'allergies' && (
                         <>
-                          <TableCell>{record.allergen}</TableCell>
+                          <TableCell>{recordObj.allergen}</TableCell>
                           <TableCell>
                             <span className={`px-2 py-1 text-xs rounded-full ${
-                              record.severity === 'severe' ? 'bg-red-100 text-red-800' :
-                              record.severity === 'moderate' ? 'bg-yellow-100 text-yellow-800' :
+                              recordObj.severity === 'severe' ? 'bg-red-100 text-red-800' :
+                              recordObj.severity === 'moderate' ? 'bg-yellow-100 text-yellow-800' :
                               'bg-green-100 text-green-800'
                             }`}>
-                              {record.severity}
+                              {recordObj.severity}
                             </span>
                           </TableCell>
-                          <TableCell>{record.reaction}</TableCell>
+                          <TableCell>{recordObj.reaction}</TableCell>
                         </>
                       )}
                       
                       {activeTab === 'medications' && (
                         <>
-                          <TableCell>{record.name}</TableCell>
-                          <TableCell>{record.dosage}</TableCell>
-                          <TableCell>{record.frequency}</TableCell>
+                          <TableCell>{recordObj.name}</TableCell>
+                          <TableCell>{recordObj.dosage}</TableCell>
+                          <TableCell>{recordObj.frequency}</TableCell>
                           <TableCell>
                             <span className={`px-2 py-1 text-xs rounded-full ${
-                              record.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-black'
+                              recordObj.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-black'
                             }`}>
-                              {record.isActive ? 'Active' : 'Inactive'}
+                              {recordObj.isActive ? 'Active' : 'Inactive'}
                             </span>
                           </TableCell>
                         </>
@@ -340,7 +333,8 @@ export default function ClinicalPage() {
                         </div>
                       </TableCell>
                     </TableRow>
-                  ))}
+                    )
+                  })}
                 </TableBody>
               </Table>
             )}

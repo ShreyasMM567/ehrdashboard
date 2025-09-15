@@ -55,7 +55,7 @@ export function usePatientMutations() {
     const success = await deletePatient(id)
     if (success) {
       mutate()
-      mutate(`patient-${id}`, null, false)
+      mutate(`patient-${id}`)
     }
     return success
   }

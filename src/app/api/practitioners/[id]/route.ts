@@ -7,7 +7,7 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  return createAuthenticatedHandler(async (req: NextRequest, token) => {
+  return createAuthenticatedHandler(async (_req: NextRequest, _token) => {
   try {
     const { id } = await params
     
@@ -35,10 +35,12 @@ export async function GET(
     
     return NextResponse.json(response.data)
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching practitioner:', error)
     
-    if (error.response?.status === 404) {
+    if (error && typeof error === 'object' && 'response' in error && 
+        error.response && typeof error.response === 'object' && 'status' in error.response && 
+        error.response.status === 404) {
       return NextResponse.json({ error: 'Practitioner not found' }, { status: 404 })
     }
     

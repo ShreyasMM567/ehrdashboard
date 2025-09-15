@@ -1,6 +1,5 @@
 // Mock axios
 jest.mock('axios')
-const mockedAxios = require('axios')
 
 // Mock auth middleware
 jest.mock('@/lib/auth-middleware', () => ({

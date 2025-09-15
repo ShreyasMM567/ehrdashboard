@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/Input'
 
 const conditionSchema = z.object({
   code: z.string().min(1, 'Condition name is required'),
-  clinicalStatus: z.enum(['active', 'inactive', 'resolved']).default('active'),
+  clinicalStatus: z.enum(['active', 'inactive', 'resolved']),
   category: z.string().min(1, 'Category is required'),
   severity: z.string().optional(),
   onsetDate: z.string().optional(),
@@ -25,7 +25,7 @@ interface ConditionFormProps {
   isLoading?: boolean
 }
 
-function ConditionForm({ patientId, onSubmit, onCancel, isLoading }: ConditionFormProps) {
+function ConditionForm({ onSubmit, onCancel, isLoading }: ConditionFormProps) {
   const {
     register,
     handleSubmit,

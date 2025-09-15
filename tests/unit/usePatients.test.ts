@@ -1,6 +1,5 @@
-import { renderHook, waitFor } from '@testing-library/react'
+import { renderHook } from '@testing-library/react'
 import { usePatients, usePatient, usePatientMutations } from '@/hooks/usePatients'
-import { getPatients, getPatient, createPatient, updatePatient, deletePatient } from '@/lib/api/patients'
 
 // Mock SWR
 jest.mock('swr', () => ({
@@ -18,7 +17,8 @@ jest.mock('@/lib/api/patients', () => ({
   searchPatientById: jest.fn()
 }))
 
-const mockSWR = require('swr').default
+import useSWR from 'swr'
+const mockSWR = useSWR
 
 describe('usePatients Hook', () => {
   beforeEach(() => {
@@ -124,7 +124,7 @@ describe('usePatient Hook', () => {
       mutate: jest.fn()
     })
 
-    const { result } = renderHook(() => usePatient(''))
+    renderHook(() => usePatient(''))
 
     expect(mockSWR).toHaveBeenCalledWith(null, expect.any(Function))
   })
@@ -160,7 +160,8 @@ describe('usePatientMutations Hook', () => {
 
     // Mock the createPatient function
     const mockCreatePatient = jest.fn().mockResolvedValue(mockNewPatient)
-    require('@/lib/api/patients').createPatient = mockCreatePatient
+    const patientsModule = await import('@/lib/api/patients')
+    patientsModule.createPatient = mockCreatePatient
 
     const { result } = renderHook(() => usePatientMutations())
 

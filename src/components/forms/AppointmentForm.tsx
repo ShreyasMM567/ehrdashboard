@@ -39,14 +39,14 @@ export function AppointmentForm({ appointment, onSubmit, onCancel }: Appointment
     defaultValues: appointment ? {
       patientId: appointment.patientId,
       patientName: appointment.patientName,
-      providerId: appointment.providerId,
-      providerName: appointment.providerName,
-      date: appointment.date,
-      time: appointment.time,
-      duration: appointment.duration,
-      type: appointment.type,
-      status: appointment.status,
-      notes: appointment.notes || ''
+      providerId: appointment.practitionerId || '',
+      providerName: appointment.practitionerName || '',
+      date: appointment.start ? appointment.start.split('T')[0] : '',
+      time: appointment.start ? appointment.start.split('T')[1]?.split('.')[0] || '' : '',
+      duration: appointment.minutesDuration || 30,
+      type: appointment.serviceType as "consultation" | "follow-up" | "procedure" | "checkup" || 'consultation',
+      status: appointment.status as "scheduled" | "confirmed" | "completed" | "cancelled" | "no-show",
+      notes: appointment.description || ''
     } : {
       status: 'scheduled',
       duration: 30
@@ -54,7 +54,24 @@ export function AppointmentForm({ appointment, onSubmit, onCancel }: Appointment
   })
 
   const handleFormSubmit = (data: AppointmentFormData) => {
-    onSubmit(data)
+    // Convert date and time to start and end timestamps
+    const startDateTime = new Date(`${data.date}T${data.time}`)
+    const endDateTime = new Date(startDateTime.getTime() + data.duration * 60000) // Add duration in milliseconds
+    
+    const appointmentData: Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'> = {
+      status: data.status,
+      start: startDateTime.toISOString(),
+      end: endDateTime.toISOString(),
+      patientId: data.patientId,
+      patientName: data.patientName,
+      practitionerId: data.providerId,
+      practitionerName: data.providerName,
+      description: data.notes,
+      serviceType: data.type,
+      minutesDuration: data.duration
+    }
+    
+    onSubmit(appointmentData)
   }
 
   return (

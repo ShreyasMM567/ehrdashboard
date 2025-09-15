@@ -6,7 +6,7 @@ import { getApiCredentialsFromRequest } from '@/lib/utils'
 const API_BASE_URL = process.env.API_BASE_URL
 const API_URL_PREFIX = process.env.API_URL_PREFIX
 // GET /api/patients
-export const GET = createAuthenticatedHandler(async (request: NextRequest, token) => {
+export const GET = createAuthenticatedHandler(async (request: NextRequest, _token) => {
   try {
     const { apiKey, accessToken } = getApiCredentialsFromRequest(request)
     
@@ -39,7 +39,7 @@ export const GET = createAuthenticatedHandler(async (request: NextRequest, token
 })
 
 // POST /api/patients
-export const POST = createAuthenticatedHandler(async (request: NextRequest, token) => {
+export const POST = createAuthenticatedHandler(async (request: NextRequest, _token) => {
   try {
     const { apiKey, accessToken } = getApiCredentialsFromRequest(request)
     const body = await request.json()
@@ -66,13 +66,14 @@ export const POST = createAuthenticatedHandler(async (request: NextRequest, toke
       id: patientId,
       location: locationHeader
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error creating patient:', error)
-    console.error('Error response:', error.response?.data)
-    console.error('Error status:', error.response?.status)
+    const errorObj = error as any
+    console.error('Error response:', errorObj.response?.data)
+    console.error('Error status:', errorObj.response?.status)
     return NextResponse.json({ 
       error: 'Failed to create patient',
-      details: error.response?.data 
-    }, { status: error.response?.status || 500 })
+      details: errorObj.response?.data 
+    }, { status: errorObj.response?.status || 500 })
   }
 })

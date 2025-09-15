@@ -202,7 +202,7 @@ export default function SignupPage() {
             <h3 className="text-sm font-medium text-green-800 mb-2">Signup Info:</h3>
             <p className="text-sm text-green-700">
               Any email and password combination will work for signup. 
-              Use any email (except "admin") and any password with 6+ characters.
+              Use any email (except &quot;admin&quot;) and any password with 6+ characters.
             </p>
           </div>
 
