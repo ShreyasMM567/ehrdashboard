@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import axios from 'axios'
+import { createAuthenticatedHandler } from '@/lib/auth-middleware'
 
-export async function GET(request: NextRequest) {
+export const GET = createAuthenticatedHandler(async (request: NextRequest, token) => {
   try {
     const { searchParams } = new URL(request.url)
     const patientId = searchParams.get('patientId')
@@ -38,9 +39,9 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     )
   }
-}
+})
 
-export async function POST(request: NextRequest) {
+export const POST = createAuthenticatedHandler(async (request: NextRequest, token) => {
   try {
     const body = await request.json()
     const { patientId, medicationCodeableConcept, status, effectiveDateTime, dosage, note } = body
@@ -99,4 +100,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     )
   }
-}
+})

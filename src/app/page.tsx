@@ -1,8 +1,14 @@
+"use client"
+
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Users, Calendar, Stethoscope, CreditCard } from 'lucide-react'
+import { useSession } from 'next-auth/react'
+import ProtectedRoute from '@/components/auth/ProtectedRoute'
 
 export default function Home() {
+  const { data: session } = useSession()
+
   const stats = [
     {
       title: 'Total Patients',
@@ -35,13 +41,16 @@ export default function Home() {
   ]
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
-        {/* Page Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-black">Dashboard</h1>
-          <p className="text-black mt-2">Welcome to your EHR Integration Dashboard</p>
-        </div>
+    <ProtectedRoute>
+      <DashboardLayout>
+        <div className="space-y-6">
+          {/* Page Header */}
+          <div>
+            <h1 className="text-3xl font-bold text-black">Dashboard</h1>
+            <p className="text-black mt-2">
+              Welcome to your EHR Integration Dashboard, {session?.user?.name || session?.user?.email}
+            </p>
+          </div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -124,7 +133,8 @@ export default function Home() {
             </CardContent>
           </Card>
         </div>
-    </div>
-    </DashboardLayout>
+        </div>
+      </DashboardLayout>
+    </ProtectedRoute>
   )
 }

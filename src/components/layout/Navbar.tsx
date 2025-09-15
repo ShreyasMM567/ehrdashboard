@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { usePathname } from 'next/navigation'
-import { Bell, User, Settings, LogOut } from 'lucide-react'
+import { LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 
 export function Navbar() {
@@ -40,30 +40,11 @@ export function Navbar() {
 
         {/* Right side actions */}
         <div className="flex items-center space-x-4">
-          {/* Notifications */}
-          <button className="p-2 text-black hover:text-gray-800 transition-colors">
-            <Bell className="h-5 w-5" />
-          </button>
-
-          {/* User menu */}
-          <div className="flex items-center space-x-3">
-            <div className="text-right">
-              <p className="text-sm font-medium text-black">Dr. Smith</p>
-              <p className="text-xs text-black">Physician</p>
-            </div>
-            <div className="flex items-center space-x-2">
-              <button className="p-2 text-black hover:text-gray-800 transition-colors">
-                <Settings className="h-5 w-5" />
-              </button>
-              <button className="p-2 text-black hover:text-gray-800 transition-colors">
-                <User className="h-5 w-5" />
-              </button>
-              <Button variant="ghost" size="sm">
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout
-              </Button>
-            </div>
-          </div>
+          {/* Logout button */}
+          <Button variant="ghost" size="sm">
+            <LogOut className="h-4 w-4 mr-2" />
+            Logout
+          </Button>
         </div>
       </div>
     </header>

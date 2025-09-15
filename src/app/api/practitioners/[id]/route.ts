@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import axios from 'axios'
+import { createAuthenticatedHandler } from '@/lib/auth-middleware'
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  return createAuthenticatedHandler(async (req: NextRequest, token) => {
   try {
     const { id } = await params
     
@@ -45,4 +47,5 @@ export async function GET(
       { status: 500 }
     )
   }
+  })(request)
 }

@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import axios from 'axios'
+import { createAuthenticatedHandler } from '@/lib/auth-middleware'
 
 const API_BASE_URL = process.env.API_BASE_URL
 const API_URL_PREFIX = process.env.API_URL_PREFIX
 const API_ACCESS_TOKEN = process.env.API_ACCESS_TOKEN
 const API_KEY = process.env.API_KEY
 // GET /api/patients
-export async function GET(request: NextRequest) {
+export const GET = createAuthenticatedHandler(async (request: NextRequest, token) => {
   try {
     const { searchParams } = new URL(request.url)
     const count = searchParams.get('_count') || '10'
@@ -34,10 +35,10 @@ export async function GET(request: NextRequest) {
     console.error('Error fetching patients:', error)
     return NextResponse.json({ error: 'Failed to fetch patients' }, { status: 500 })
   }
-}
+})
 
 // POST /api/patients
-export async function POST(request: NextRequest) {
+export const POST = createAuthenticatedHandler(async (request: NextRequest, token) => {
   try {
     const body = await request.json()
     console.log('Request body:', JSON.stringify(body, null, 2))
@@ -72,4 +73,4 @@ export async function POST(request: NextRequest) {
       details: error.response?.data 
     }, { status: error.response?.status || 500 })
   }
-}
+})

@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import axios from 'axios'
+import { createAuthenticatedHandler } from '@/lib/auth-middleware'
 
 const API_BASE_URL = process.env.API_BASE_URL
 const API_URL_PREFIX = process.env.API_URL_PREFIX
 const API_ACCESS_TOKEN = process.env.API_ACCESS_TOKEN
 const API_KEY = process.env.API_KEY
 
-export async function GET(request: NextRequest) {
+export const GET = createAuthenticatedHandler(async (request: NextRequest, token) => {
   try {
     
     if (!API_BASE_URL || !API_URL_PREFIX || !API_KEY || !API_ACCESS_TOKEN) {
@@ -43,9 +44,9 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     )
   }
-}
+})
 
-export async function POST(request: NextRequest) {
+export const POST = createAuthenticatedHandler(async (request: NextRequest, token) => {
   try {
     const body = await request.json()
     const { patientId, practitionerId, startDateTime, endDateTime, minutesDuration } = body
@@ -171,4 +172,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     )
   }
-}
+})

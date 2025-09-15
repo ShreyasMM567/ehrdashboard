@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import axios from 'axios'
+import { createAuthenticatedHandler } from '@/lib/auth-middleware'
 
 const API_BASE_URL = process.env.API_BASE_URL
 const API_URL_PREFIX = process.env.API_URL_PREFIX
@@ -10,6 +11,7 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  return createAuthenticatedHandler(async (req: NextRequest, token) => {
   try {
     const { id } = await params
     
@@ -45,12 +47,14 @@ export async function GET(
       { status: 500 }
     )
   }
+  })(request)
 }
 
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  return createAuthenticatedHandler(async (req: NextRequest, token) => {
   try {
     const { id } = await params
     const body = await request.json()
@@ -90,4 +94,5 @@ export async function PUT(
       details: error.response?.data
     }, { status: error.response?.status || 500 })
   }
+  })(request)
 }

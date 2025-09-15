@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import axios from 'axios'
+import { createAuthenticatedHandler } from '@/lib/auth-middleware'
 
 const API_BASE_URL = process.env.API_BASE_URL
 const API_URL_PREFIX = process.env.API_URL_PREFIX
@@ -11,6 +12,7 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  return createAuthenticatedHandler(async (req: NextRequest, token) => {
   try {
     const { id } = await params
     const response = await axios.get(
@@ -29,6 +31,7 @@ export async function GET(
     console.error('Error fetching patient:', error)
     return NextResponse.json({ error: 'Failed to fetch patient' }, { status: 500 })
   }
+  })(request)
 }
 
 // PUT /api/patients/[id]
@@ -36,6 +39,7 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  return createAuthenticatedHandler(async (req: NextRequest, token) => {
   try {
     const { id } = await params
     const body = await request.json()
@@ -65,6 +69,7 @@ export async function PUT(
       details: error.response?.data
     }, { status: error.response?.status || 500 })
   }
+  })(request)
 }
 
 // DELETE /api/patients/[id]
@@ -72,6 +77,7 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  return createAuthenticatedHandler(async (req: NextRequest, token) => {
   try {
     const { id } = await params
     await axios.delete(
@@ -90,4 +96,5 @@ export async function DELETE(
     console.error('Error deleting patient:', error)
     return NextResponse.json({ error: 'Failed to delete patient' }, { status: 500 })
   }
+  })(request)
 }

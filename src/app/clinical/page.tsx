@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
+import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/Table'
@@ -9,15 +10,22 @@ import { Modal } from '@/components/ui/Modal'
 import { VitalsForm } from '@/components/forms/VitalsForm'
 import AllergyForm from '@/components/forms/AllergyForm'
 import MedicationForm from '@/components/forms/MedicationForm'
-import { usePatients } from '@/hooks/usePatients'
 import { Plus, Heart, AlertTriangle, Pill } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
 
 export default function ClinicalPage() {
-  const { patients } = usePatients({ page: 1, count: 10 })
   const [activeTab, setActiveTab] = useState<'vitals' | 'allergies' | 'medications'>('vitals')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedPatient, setSelectedPatient] = useState<string>('')
+
+  // Placeholder patient data for display
+  const placeholderPatients = [
+    { id: '1', name: 'John Doe', dateOfBirth: '1985-03-15', gender: 'Male' },
+    { id: '2', name: 'Jane Smith', dateOfBirth: '1990-07-22', gender: 'Female' },
+    { id: '3', name: 'Michael Johnson', dateOfBirth: '1978-11-08', gender: 'Male' },
+    { id: '4', name: 'Sarah Wilson', dateOfBirth: '1992-05-14', gender: 'Female' },
+    { id: '5', name: 'David Brown', dateOfBirth: '1988-09-30', gender: 'Male' }
+  ]
 
   // Mock data for clinical records
   const mockVitals = [
@@ -34,6 +42,34 @@ export default function ClinicalPage() {
       bmi: 25.1,
       oxygenSaturation: 98,
       notes: 'All vitals within normal range'
+    },
+    {
+      id: '2',
+      patientId: '2',
+      patientName: 'Jane Smith',
+      date: '2024-01-14',
+      bloodPressure: { systolic: 110, diastolic: 70 },
+      heartRate: 68,
+      temperature: 98.4,
+      weight: 140,
+      height: 65,
+      bmi: 23.3,
+      oxygenSaturation: 99,
+      notes: 'Patient reports feeling well'
+    },
+    {
+      id: '3',
+      patientId: '3',
+      patientName: 'Michael Johnson',
+      date: '2024-01-13',
+      bloodPressure: { systolic: 135, diastolic: 85 },
+      heartRate: 78,
+      temperature: 98.8,
+      weight: 190,
+      height: 72,
+      bmi: 25.8,
+      oxygenSaturation: 97,
+      notes: 'Slightly elevated blood pressure, monitor closely'
     }
   ]
 
@@ -47,6 +83,26 @@ export default function ClinicalPage() {
       reaction: 'Hives and difficulty breathing',
       notes: 'Patient carries EpiPen',
       createdAt: '2024-01-15T10:00:00Z'
+    },
+    {
+      id: '2',
+      patientId: '2',
+      patientName: 'Jane Smith',
+      allergen: 'Shellfish',
+      severity: 'moderate',
+      reaction: 'Nausea and skin rash',
+      notes: 'Avoid all shellfish products',
+      createdAt: '2024-01-10T14:30:00Z'
+    },
+    {
+      id: '3',
+      patientId: '3',
+      patientName: 'Michael Johnson',
+      allergen: 'Latex',
+      severity: 'mild',
+      reaction: 'Skin irritation',
+      notes: 'Use non-latex gloves during procedures',
+      createdAt: '2024-01-08T09:15:00Z'
     }
   ]
 
@@ -61,6 +117,30 @@ export default function ClinicalPage() {
       startDate: '2024-01-01',
       prescribedBy: 'Dr. Johnson',
       notes: 'For blood pressure management',
+      isActive: true
+    },
+    {
+      id: '2',
+      patientId: '2',
+      patientName: 'Jane Smith',
+      name: 'Metformin',
+      dosage: '500mg',
+      frequency: 'Twice daily',
+      startDate: '2023-12-15',
+      prescribedBy: 'Dr. Williams',
+      notes: 'For type 2 diabetes management',
+      isActive: true
+    },
+    {
+      id: '3',
+      patientId: '3',
+      patientName: 'Michael Johnson',
+      name: 'Atorvastatin',
+      dosage: '20mg',
+      frequency: 'Once daily',
+      startDate: '2023-11-20',
+      prescribedBy: 'Dr. Brown',
+      notes: 'For cholesterol management',
       isActive: true
     }
   ]
@@ -119,8 +199,9 @@ export default function ClinicalPage() {
   ]
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
+    <ProtectedRoute>
+      <DashboardLayout>
+        <div className="space-y-6">
         {/* Page Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -275,7 +356,8 @@ export default function ClinicalPage() {
         >
           {getFormComponent()}
         </Modal>
-      </div>
-    </DashboardLayout>
+        </div>
+      </DashboardLayout>
+    </ProtectedRoute>
   )
 }
